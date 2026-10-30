@@ -103,6 +103,7 @@ export default function FactureDetailPage() {
             <div>
               <p className="text-lg font-extrabold text-slate-900">{shop.name}</p>
               {shop.address && <p className="text-xs text-slate-500">{shop.address}</p>}
+              {shop.activity && <p className="max-w-sm text-xs text-slate-500">{shop.activity}</p>}
               <p className="text-xs text-slate-500">{[shop.phone, shop.secondaryPhone, shop.email].filter(Boolean).join(" · ")}</p>
               {(shop.ninea || shop.rccm) && (
                 <p className="text-xs text-slate-500">

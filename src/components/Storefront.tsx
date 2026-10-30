@@ -30,9 +30,9 @@ function ProductCard({ p, onOpen }: { p: Product; onOpen: (p: Product) => void }
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ y: -4 }}
       transition={{ type: "spring", stiffness: 260, damping: 24 }}
-      className="group card flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-[0_18px_40px_rgba(37,99,235,0.12)]"
+      className="group card flex flex-col overflow-hidden !rounded-3xl !border-slate-100 !bg-white transition duration-300 hover:-translate-y-1 hover:!border-blue-100 hover:!shadow-[0_22px_48px_rgba(37,99,235,0.13)]"
     >
-      <button onClick={() => onOpen(p)} className="relative block aspect-square overflow-hidden text-left">
+      <button onClick={() => onOpen(p)} aria-label={`Voir le détail de ${p.name}`} className="relative block aspect-square overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50 text-left">
         <div className={cn("h-full w-full transition duration-500 group-hover:scale-105", out && "grayscale")}>
           <ProductImage name={p.name} image={p.image} />
         </div>
@@ -43,17 +43,17 @@ function ProductCard({ p, onOpen }: { p: Product; onOpen: (p: Product) => void }
           {out ? "Stock : 0" : `Stock : ${p.stock}`}
         </span>
       </button>
-      <div className="flex flex-1 flex-col p-3.5">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-600">{p.category}</p>
-        <h3 className="mt-0.5 line-clamp-2 text-sm font-bold text-slate-900">{p.name}</h3>
-        <p className="mt-1 text-lg font-extrabold text-slate-900">{money(p.sellPrice)}</p>
+      <div className="flex flex-1 flex-col p-4">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-600">{p.category}</p>
+        <h3 className="mt-1 line-clamp-2 min-h-10 text-sm font-bold leading-relaxed text-slate-900">{p.name}</h3>
+        <p className="mt-2 text-lg font-extrabold tracking-tight text-slate-950">{money(p.sellPrice)}</p>
         <a
           href={waLink(`Bonjour ${shop.name}, je souhaite commander : 1 × ${p.name} (${money(p.sellPrice)}).`)}
           target="_blank"
           rel="noreferrer"
           aria-disabled={out}
           className={cn(
-            "btn-primary mt-3 w-full !bg-[#25D366] !px-3 !py-2 text-xs hover:!bg-[#1ebe5b]",
+            "btn-primary mt-4 w-full !rounded-xl !bg-[#20c968] !px-3 !py-2.5 text-xs hover:!bg-[#18b85c]",
             out && "pointer-events-none !bg-slate-200 !text-slate-400"
           )}
         >
@@ -131,17 +131,18 @@ export function Storefront() {
     const t = q.trim().toLowerCase();
     return db.products.filter((p) => (cat === "Tous" || p.category === cat) && (!t || `${p.name} ${p.category}`.toLowerCase().includes(t)));
   }, [db.products, q, cat]);
+  const availableProducts = db.products.filter((p) => p.stock > 0).length;
 
   return (
     <div className="storefront-shell min-h-screen">
       {/* Barre de navigation */}
-      <header className="sticky top-0 z-40 border-b border-white/70 bg-white/85 shadow-[0_4px_24px_rgba(15,23,42,0.04)] backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 shadow-[0_4px_24px_rgba(15,23,42,0.04)] backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5 sm:py-3">
           <a href="#top" className="flex items-center gap-2.5">
             <Logo size={42} />
             <span>
               <span className="block text-base font-extrabold tracking-tight text-slate-900">{shop.name}</span>
-              <span className="hidden text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-600 sm:block">Technologie & accessoires</span>
+              <span className="hidden text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 sm:block">Technologie & accessoires</span>
             </span>
           </a>
           <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-600 md:flex">
@@ -197,6 +198,11 @@ export function Storefront() {
                 <span className="inline-flex items-center gap-2"><Headphones size={15} className="text-cyan-300" /> Audio</span>
                 <span className="inline-flex items-center gap-2"><Laptop size={15} className="text-cyan-300" /> Informatique</span>
               </div>
+              {shop.address && (
+                <p className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-blue-100/75">
+                  <MapPin size={14} className="shrink-0 text-cyan-300" /> Retrouvez-nous : {shop.address}
+                </p>
+              )}
             </motion.div>
 
             <motion.div
@@ -229,18 +235,18 @@ export function Storefront() {
             </motion.div>
           </div>
 
-          <div className="mt-14 grid gap-3 border-t border-white/10 pt-5 sm:grid-cols-3 sm:gap-5 lg:mt-16">
+          <div className="mt-12 grid gap-3 border-t border-white/10 pt-5 sm:grid-cols-3 sm:gap-5 lg:mt-16">
             {[
-              { icon: Smartphone, title: "Explorez", text: "Parcourez le catalogue de la boutique." },
-              { icon: Sparkles, title: "Trouvez", text: "Découvrez les produits qui vous intéressent." },
-              { icon: MessageCircle, title: "Échangez", text: "Contactez-nous pour votre commande." },
+              { icon: Smartphone, title: `${db.products.length} produit${db.products.length > 1 ? "s" : ""}`, text: "Un catalogue de téléphones et d’accessoires à découvrir." },
+              { icon: Sparkles, title: `${availableProducts} disponible${availableProducts > 1 ? "s" : ""}`, text: "Consultez les disponibilités affichées sur chaque produit." },
+              { icon: MessageCircle, title: "Commande directe", text: "Échangez avec notre équipe sur WhatsApp." },
             ].map((item, index) => (
-              <div key={item.title} className="flex items-start gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-3.5 backdrop-blur-sm sm:border-transparent sm:bg-transparent sm:p-2">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-200/10 text-cyan-200">
+              <div key={index} className="flex items-start gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-3.5 backdrop-blur-sm sm:border-transparent sm:bg-transparent sm:p-2">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cyan-200/10 text-cyan-200 ring-1 ring-cyan-100/10">
                   <item.icon size={17} />
                 </span>
                 <span>
-                  <span className="block text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-200/80">0{index + 1} · {item.title}</span>
+                  <span className="block text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-200/80">{item.title}</span>
                   <span className="mt-1 block text-xs leading-relaxed text-blue-100/70">{item.text}</span>
                 </span>
               </div>
@@ -253,16 +259,18 @@ export function Storefront() {
       </section>
 
       {/* Catalogue */}
-      <section id="produits" className="mx-auto max-w-6xl scroll-mt-20 px-4 pb-20 pt-10 sm:pt-14">
-        <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-600">La sélection OUSMATECH</span>
-            <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Trouvez votre prochain coup de cœur</h2>
-            <p className="mt-1.5 text-sm text-slate-500">Téléphones, audio, informatique et accessoires : découvrez notre catalogue.</p>
+      <section id="produits" className="mx-auto max-w-6xl scroll-mt-20 px-4 pb-20 pt-12 sm:pt-16">
+        <div className="mb-8 flex flex-col gap-5 rounded-[2rem] border border-blue-100/80 bg-white/75 p-5 shadow-[0_18px_50px_rgba(30,64,175,0.06)] sm:p-7 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-700 ring-1 ring-blue-100">
+              <Sparkles size={13} /> La sélection {shop.name}
+            </span>
+            <h2 className="mt-3 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Tout ce qu’il vous faut, au même endroit.</h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-500">Téléphones, audio, informatique et accessoires : trouvez votre prochain coup de cœur.</p>
           </div>
           <div className="relative w-full md:w-80 md:shrink-0">
             <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher un appareil…" className="input !pl-10" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher un appareil…" aria-label="Rechercher un produit" className="input !rounded-2xl !py-3 !pl-10 !shadow-sm" />
           </div>
         </div>
 
@@ -305,11 +313,12 @@ export function Storefront() {
       </section>
 
       {/* Contact + QR */}
-      <section id="contact" className="scroll-mt-20 border-y border-blue-100/70 bg-gradient-to-br from-white via-white to-blue-50/70 py-16 sm:py-20">
+      <section id="contact" className="scroll-mt-20 border-y border-blue-100/70 bg-gradient-to-br from-white via-blue-50/40 to-blue-100/50 py-16 sm:py-20">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-[1.3fr_1fr]">
           <div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Nous contacter</h2>
-            <p className="mt-1 text-slate-500">Une question ? Une commande ? {shop.manager} vous répond.</p>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-600">Toujours à votre écoute</span>
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">Parlons de votre prochain achat.</h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-500">Une question ou besoin d’un conseil ? {shop.manager} vous répond.</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {[
                 { icon: Phone, label: "Téléphone", value: shop.phone, href: telLink },
@@ -332,11 +341,11 @@ export function Storefront() {
                   </>
                 );
                 return c.href ? (
-                  <a key={c.label} href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noreferrer" className="card flex items-center gap-3 p-3.5 transition hover:-translate-y-0.5 hover:shadow-md">
+                  <a key={c.label} href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noreferrer" className="card flex items-center gap-3 !rounded-2xl !border-slate-100 p-3.5 transition hover:-translate-y-0.5 hover:!border-blue-100 hover:shadow-md">
                     {body}
                   </a>
                 ) : (
-                  <div key={c.label} className="card flex items-center gap-3 p-3.5">
+                  <div key={c.label} className="card flex items-center gap-3 !rounded-2xl !border-slate-100 p-3.5">
                     {body}
                   </div>
                 );
