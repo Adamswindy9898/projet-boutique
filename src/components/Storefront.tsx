@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Clock, Headphones, Laptop, Lock, Mail, MapPin, MessageCircle, Minus, PackageSearch, Phone, Plus, Search, Smartphone, Sparkles } from "lucide-react";
+import { ArrowRight, Clock, Headphones, Laptop, Mail, MapPin, MessageCircle, Minus, PackageSearch, Phone, Plus, Search, Smartphone, Sparkles } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { shop } from "@/config/shop";
 import { cn, money, telLink, waLink } from "@/lib/utils";
@@ -153,9 +152,6 @@ export function Storefront() {
             <a href={telLink} className="btn-soft !px-3 !py-2 sm:!px-4">
               <Phone size={16} /> <span className="hidden sm:inline">Appeler</span>
             </a>
-            <Link href="/connexion" className="btn-ghost !px-3 !py-2" title="Espace gérant">
-              <Lock size={16} /> <span className="hidden sm:inline">Espace gérant</span>
-            </Link>
           </div>
         </div>
       </header>
