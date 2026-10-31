@@ -1,4 +1,4 @@
 node_modules
 .next/
-*.tsbuildinfo.env.local
-.env.local
+*.tsbuildinfo
+.env*.local

@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, FileCheck2, MessageCircle, Printer, Share2, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, FileCheck2, Printer, Share2, Trash2 } from "lucide-react";
 import { shop } from "@/config/shop";
 import { useStore } from "@/lib/store";
-import { cn, digits, fmtDate, invoiceTotals, money, statusMeta, waLink } from "@/lib/utils";
+import { cn, fmtDate, invoiceTotals, money, statusMeta } from "@/lib/utils";
+import { createInvoicePdf, downloadInvoicePdf } from "@/lib/invoice-pdf";
 import { Loading, Modal, useToast } from "@/components/ui";
 import { Logo } from "@/components/Logo";
 import { QrMini } from "@/components/QrCard";
@@ -17,6 +18,7 @@ export default function FactureDetailPage() {
   const toast = useToast();
   const { db, ready, convertQuote, deleteInvoice } = useStore();
   const [delOpen, setDelOpen] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   if (!ready) return <Loading />;
   const inv = db.invoices.find((i) => i.id === id);
@@ -34,27 +36,43 @@ export default function FactureDetailPage() {
   const isQuote = inv.type === "devis";
   const title = isQuote ? "DEVIS" : "FACTURE";
 
-  const text =
-    `${shop.name}\n${isQuote ? "Devis" : "Facture"} ${inv.number} du ${fmtDate(inv.date)}\n` +
-    inv.items.map((i) => `• ${i.qty} × ${i.name} : ${money(i.qty * i.price)}`).join("\n") +
-    `\nTotal : ${money(t.total)}` +
-    `\nMerci de votre confiance !`;
-
   const share = async () => {
-    const shareApi = navigator.share;
-    if (typeof shareApi === "function") {
-      try {
-        await shareApi.call(navigator, { title: `${title} ${inv.number}`, text });
-        return;
-      } catch {
-        return;
-      }
-    }
+    setSharing(true);
     try {
-      await navigator.clipboard.writeText(text);
-      toast("Résumé copié dans le presse-papiers", "info");
-    } catch {
-      toast("Partage indisponible sur cet appareil", "error");
+      const file = await createInvoicePdf(inv, window.location.origin);
+      const shareData: ShareData = {
+        files: [file],
+        title: `${title} ${inv.number}`,
+        text: `${title} ${inv.number} — ${money(t.total)}`,
+      };
+
+      if (typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share(shareData);
+          return;
+        } catch (error) {
+          if (error instanceof DOMException && error.name === "AbortError") return;
+          throw error;
+        }
+      }
+
+      downloadInvoicePdf(file);
+      toast("PDF téléchargé. Vous pouvez maintenant le joindre à votre message.", "info");
+    } catch (error) {
+      console.error("Impossible de préparer le PDF de la facture.", error);
+      toast("Impossible de créer ou partager le PDF. Réessayez.", "error");
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const downloadPdf = async () => {
+    try {
+      downloadInvoicePdf(await createInvoicePdf(inv, window.location.origin));
+      toast("PDF téléchargé");
+    } catch (error) {
+      console.error("Impossible de créer le PDF de la facture.", error);
+      toast("Impossible de créer le PDF. Réessayez.", "error");
     }
   };
 
@@ -71,11 +89,11 @@ export default function FactureDetailPage() {
         <button onClick={() => window.print()} className="btn-primary">
           <Printer size={16} /> Imprimer / PDF
         </button>
-        <a href={waLink(text, inv.customerPhone ? digits(inv.customerPhone) : "")} target="_blank" rel="noreferrer" className="btn !bg-[#25D366] text-white hover:!bg-[#1ebe5b]">
-          <MessageCircle size={16} /> WhatsApp
-        </a>
-        <button onClick={share} className="btn-ghost">
-          <Share2 size={16} /> Partager
+        <button onClick={downloadPdf} className="btn-ghost">
+          <Download size={16} /> Télécharger PDF
+        </button>
+        <button onClick={share} disabled={sharing} className="btn-ghost">
+          <Share2 size={16} /> {sharing ? "Préparation du PDF…" : "Partager le PDF"}
         </button>
         {isQuote ? (
           <button
@@ -94,7 +112,7 @@ export default function FactureDetailPage() {
           <Trash2 size={16} />
         </button>
       </div>
-      <p className="no-print mb-4 text-xs text-slate-400">Astuce : dans la fenêtre d&apos;impression, choisissez « Enregistrer au format PDF » pour obtenir un fichier à envoyer.</p>
+      <p className="no-print mb-4 text-xs text-slate-400">Le partage envoie le PDF de la facture. Si le partage de fichiers n&apos;est pas pris en charge, téléchargez-le puis joignez-le à votre message.</p>
 
       {/* Document imprimable */}
       <div className="print-area card overflow-hidden p-6 sm:p-9">
@@ -104,6 +122,7 @@ export default function FactureDetailPage() {
             <div>
               <p className="text-lg font-extrabold text-slate-900">{shop.name}</p>
               {shop.address && <p className="text-xs text-slate-500">{shop.address}</p>}
+              {shop.activity && <p className="max-w-sm text-xs text-slate-500">{shop.activity}</p>}
               <p className="text-xs text-slate-500">{[shop.phone, shop.secondaryPhone, shop.email].filter(Boolean).join(" · ")}</p>
               {(shop.ninea || shop.rccm) && (
                 <p className="text-xs text-slate-500">

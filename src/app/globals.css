@@ -28,89 +28,55 @@ button {
 }
 
 .storefront-shell {
-  background: #f8fafc;
+  background-color: #f8fafc;
+  background-image:
+    radial-gradient(ellipse at 2% 28%, rgba(219, 234, 254, 0.42), transparent 34rem),
+    radial-gradient(ellipse at 98% 70%, rgba(224, 242, 254, 0.38), transparent 32rem);
 }
 
 .storefront-hero {
   isolation: isolate;
-  background-color: #071426;
+  background-color: #07152d;
   background-image:
-    radial-gradient(ellipse at 78% 18%, rgba(34, 211, 238, 0.2), transparent 34%),
-    radial-gradient(ellipse at 10% 100%, rgba(37, 99, 235, 0.32), transparent 42%),
-    linear-gradient(115deg, #071426 0%, #0c2342 58%, #123768 100%);
+    radial-gradient(ellipse at 4% 0%, rgba(37, 99, 235, 0.38), transparent 34rem),
+    radial-gradient(ellipse at 94% 60%, rgba(8, 145, 178, 0.2), transparent 36rem),
+    linear-gradient(135deg, #07152d 0%, #0b1c3c 55%, #102b53 100%);
 }
 
 .storefront-hero::before {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background-image: radial-gradient(rgba(191, 219, 254, 0.18) 0.7px, transparent 0.7px);
-  background-size: 24px 24px;
+  background-image: radial-gradient(rgba(191, 219, 254, 0.32) 0.7px, transparent 0.7px);
+  background-size: 30px 30px;
   content: "";
-  mask-image: linear-gradient(90deg, transparent, #000 45%, #000);
-  opacity: 0.22;
+  mask-image: linear-gradient(90deg, #000, transparent 72%);
+  opacity: 0.24;
   pointer-events: none;
-}
-
-.hero-orb {
-  position: absolute;
-  z-index: -1;
-  border-radius: 9999px;
-  filter: blur(1px);
-  pointer-events: none;
-}
-
-.hero-orb-one {
-  top: 8%;
-  right: -9rem;
-  width: 25rem;
-  height: 25rem;
-  border: 1px solid rgba(165, 243, 252, 0.15);
-  box-shadow: 0 0 100px rgba(34, 211, 238, 0.12), inset 0 0 70px rgba(34, 211, 238, 0.08);
-}
-
-.hero-orb-two {
-  bottom: 8%;
-  left: -12rem;
-  width: 30rem;
-  height: 30rem;
-  border: 1px solid rgba(147, 197, 253, 0.12);
-  box-shadow: 0 0 100px rgba(37, 99, 235, 0.16), inset 0 0 80px rgba(37, 99, 235, 0.08);
 }
 
 .hero-showcase {
   background:
-    radial-gradient(ellipse at 50% 45%, rgba(56, 189, 248, 0.15), transparent 48%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.025) 55%, rgba(37, 99, 235, 0.12));
-  backdrop-filter: blur(14px);
-}
-
-.hero-ring {
-  animation: hero-orbit 24s linear infinite;
-}
-
-.hero-ring-inner {
-  animation-direction: reverse;
-  animation-duration: 18s;
-}
-
-@keyframes hero-orbit {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-ring {
-    animation: none;
-  }
+    radial-gradient(ellipse at 92% 0%, rgba(59, 130, 246, 0.48), transparent 46%),
+    radial-gradient(ellipse at 0% 100%, rgba(8, 145, 178, 0.24), transparent 48%),
+    linear-gradient(145deg, #10274d 0%, #12366a 58%, #0c2e55 100%);
+  border: 1px solid rgba(191, 219, 254, 0.2);
 }
 
 .admin-shell {
   min-height: 100vh;
   background:
-    radial-gradient(ellipse at 88% 0%, rgba(219, 234, 254, 0.48), transparent 34rem),
-    #f6f8fc;
+    radial-gradient(ellipse at 86% 0%, rgba(191, 219, 254, 0.48), transparent 34rem),
+    radial-gradient(ellipse at 6% 46%, rgba(207, 250, 254, 0.36), transparent 30rem),
+    linear-gradient(145deg, #f8fafc 0%, #f1f5fb 52%, #f8fafc 100%);
+}
+
+.admin-page-header {
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 92% 0%, rgba(59, 130, 246, 0.42), transparent 42%),
+    radial-gradient(ellipse at 0% 100%, rgba(8, 145, 178, 0.2), transparent 48%),
+    linear-gradient(135deg, #07152d 0%, #0b1c3c 58%, #102b53 100%);
 }
 
 @layer components {

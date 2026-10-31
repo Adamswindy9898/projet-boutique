@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { Boxes, ClipboardCheck, ExternalLink, FileText, History, LayoutDashboard, LogOut, Package, Settings, Users } from "lucide-react";
 import { shop } from "@/config/shop";
-import { AUTH_KEY, restoreAuthSession } from "@/lib/auth";
+import { restoreAuthSession, signOut } from "@/lib/auth";
 import type { AuthSession } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
@@ -59,23 +59,23 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     );
 
   const active = (href: string) => (href === "/admin" ? path === "/admin" : path.startsWith(href));
-  const logout = () => {
+  const logout = async () => {
     try {
-      localStorage.removeItem(AUTH_KEY);
+      await signOut();
       router.push("/");
-    } catch {
-      toast("Déconnexion impossible sur cet appareil.", "error");
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Déconnexion impossible.", "error");
     }
   };
 
   return (
     <div className="admin-shell lg:pl-64">
-      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-800 bg-slate-950 p-4 text-white shadow-[8px_0_32px_rgba(15,23,42,0.12)] lg:flex">
-        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] px-2.5 py-3">
+      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-white/10 bg-gradient-to-b from-[#07152d] via-[#0b1c3c] to-[#102b53] p-4 shadow-[8px_0_32px_rgba(15,23,42,0.12)] lg:flex">
+        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] px-2.5 py-3 shadow-sm">
           <Logo size={42} />
           <div className="min-w-0">
-            <p className="truncate font-extrabold tracking-wide text-white">{shop.name}</p>
-            <p className="truncate text-xs text-slate-400">{session?.name}</p>
+            <p className="truncate font-extrabold text-white">{shop.name}</p>
+            <p className="truncate text-xs text-blue-200/70">{session?.name}</p>
           </div>
         </div>
         <p className="mb-2 mt-8 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Menu principal</p>
@@ -85,25 +85,25 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               key={n.href}
               href={n.href}
               className={cn(
-                "flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium transition duration-200",
-                active(n.href) ? "bg-brand-600 text-white shadow-lg shadow-brand-950/30" : "text-slate-400 hover:bg-white/[0.07] hover:text-white"
+                "flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-semibold transition duration-200",
+                active(n.href) ? "bg-cyan-300 text-slate-950 shadow-lg shadow-cyan-950/20" : "text-blue-100/75 hover:translate-x-0.5 hover:bg-white/10 hover:text-white"
               )}
             >
               <n.icon size={18} /> {n.label}
             </Link>
           ))}
         </nav>
-        <div className="space-y-1 border-t border-white/10 pt-3">
-          <Link href="/" target="_blank" className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-400 transition hover:bg-white/[0.07] hover:text-white">
+        <div className="space-y-1">
+          <Link href="/" target="_blank" className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-blue-100/75 transition hover:bg-white/10 hover:text-white">
             <ExternalLink size={18} /> Voir la vitrine
           </Link>
-          <button onClick={logout} className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-rose-300 transition hover:bg-rose-500/10">
+          <button onClick={logout} className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-rose-200 transition hover:bg-rose-400/10 hover:text-rose-100">
             <LogOut size={18} /> Déconnexion
           </button>
         </div>
       </aside>
 
-      <header className="no-print sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur lg:hidden">
+      <header className="no-print sticky top-0 z-30 flex items-center justify-between border-b border-white/70 bg-white/90 px-4 py-3 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl lg:hidden">
         <div className="flex items-center gap-2.5">
           <Logo size={34} />
           <span>
@@ -123,10 +123,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
       <main className="mx-auto max-w-6xl p-4 pb-28 sm:p-6 lg:pb-10">{children}</main>
 
-      <nav className="no-print fixed inset-x-0 bottom-0 z-30 grid grid-cols-8 border-t border-slate-200 bg-white/95 px-0.5 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden">
+      <nav aria-label="Navigation de gestion" className="no-print fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 grid-rows-2 border-t border-white/10 bg-[#07152d]/95 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(7,21,45,0.2)] backdrop-blur-xl lg:hidden">
         {nav.map((n) => (
-          <Link key={n.href} href={n.href} className={cn("flex flex-col items-center gap-1 rounded-xl py-2 text-[9px] font-semibold transition sm:text-[11px]", active(n.href) ? "bg-brand-50 text-brand-700" : "text-slate-400 hover:bg-slate-50")}>
-            <n.icon size={20} />
+          <Link key={n.href} href={n.href} className={cn("flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-[10px] font-semibold transition sm:text-[11px]", active(n.href) ? "bg-cyan-300 text-slate-950" : "text-blue-100/65 hover:bg-white/10 hover:text-white")}>
+            <n.icon size={18} />
             {n.short}
           </Link>
         ))}

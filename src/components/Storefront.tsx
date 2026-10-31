@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Clock, Headphones, Laptop, Lock, Mail, MapPin, MessageCircle, Minus, PackageSearch, Phone, Plus, Search, Smartphone, Sparkles } from "lucide-react";
+import { ArrowRight, Clock, Headphones, Laptop, Mail, MapPin, MessageCircle, Minus, PackageSearch, Phone, Plus, Search, Smartphone, Sparkles } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { shop } from "@/config/shop";
 import { cn, money, telLink, waLink } from "@/lib/utils";
@@ -30,9 +29,9 @@ function ProductCard({ p, onOpen }: { p: Product; onOpen: (p: Product) => void }
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ y: -4 }}
       transition={{ type: "spring", stiffness: 260, damping: 24 }}
-      className="group card flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-[0_18px_40px_rgba(15,23,42,0.1)]"
+      className="group card flex flex-col overflow-hidden !rounded-3xl !border-slate-100 !bg-white transition duration-300 hover:-translate-y-1 hover:!border-blue-100 hover:!shadow-[0_22px_48px_rgba(37,99,235,0.13)]"
     >
-      <button onClick={() => onOpen(p)} className="relative block aspect-square overflow-hidden text-left">
+      <button onClick={() => onOpen(p)} aria-label={`Voir le détail de ${p.name}`} className="relative block aspect-square overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50 text-left">
         <div className={cn("h-full w-full transition duration-500 group-hover:scale-105", out && "grayscale")}>
           <ProductImage name={p.name} image={p.image} />
         </div>
@@ -44,16 +43,16 @@ function ProductCard({ p, onOpen }: { p: Product; onOpen: (p: Product) => void }
         </span>
       </button>
       <div className="flex flex-1 flex-col p-4">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-600">{p.category}</p>
-        <h3 className="mt-0.5 line-clamp-2 text-sm font-bold text-slate-900">{p.name}</h3>
-        <p className="mt-1 text-lg font-extrabold text-slate-900">{money(p.sellPrice)}</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-600">{p.category}</p>
+        <h3 className="mt-1 line-clamp-2 min-h-10 text-sm font-bold leading-relaxed text-slate-900">{p.name}</h3>
+        <p className="mt-2 text-lg font-extrabold tracking-tight text-slate-950">{money(p.sellPrice)}</p>
         <a
           href={waLink(`Bonjour ${shop.name}, je souhaite commander : 1 × ${p.name} (${money(p.sellPrice)}).`)}
           target="_blank"
           rel="noreferrer"
           aria-disabled={out}
           className={cn(
-            "btn-primary mt-3 w-full !bg-[#25D366] !px-3 !py-2 text-xs hover:!bg-[#1ebe5b]",
+            "btn-primary mt-4 w-full !rounded-xl !bg-[#20c968] !px-3 !py-2.5 text-xs hover:!bg-[#18b85c]",
             out && "pointer-events-none !bg-slate-200 !text-slate-400"
           )}
         >
@@ -132,156 +131,154 @@ export function Storefront() {
     const t = q.trim().toLowerCase();
     return db.products.filter((p) => (cat === "Tous" || p.category === cat) && (!t || `${p.name} ${p.category}`.toLowerCase().includes(t)));
   }, [db.products, q, cat]);
+  const availableProducts = db.products.filter((p) => p.stock > 0).length;
 
   return (
     <div className="storefront-shell min-h-screen">
       {/* Barre de navigation */}
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 shadow-[0_4px_24px_rgba(15,23,42,0.04)] backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5 sm:px-6 sm:py-3">
+      <header className="sticky top-0 z-40 border-b border-white/70 bg-white/90 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between px-4 py-2 sm:py-3">
           <a href="#top" className="flex items-center gap-2.5">
             <Logo size={42} />
             <span>
               <span className="block text-base font-extrabold tracking-tight text-slate-900">{shop.name}</span>
-              <span className="hidden text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-600 sm:block">Technologie & accessoires</span>
+              <span className="hidden text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 sm:block">Technologie & accessoires</span>
             </span>
           </a>
-          <nav className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
-            <a href="#produits" className="transition hover:text-brand-700">Nos produits</a>
-            <a href="#contact" className="transition hover:text-brand-700">Nous contacter</a>
+          <nav aria-label="Navigation principale" className="order-3 flex w-full items-center justify-center gap-2 border-t border-slate-100 pt-2 text-xs font-semibold text-slate-600 md:order-none md:w-auto md:gap-3 md:border-0 md:pt-0 md:text-sm">
+            <a href="#produits" className="rounded-full px-4 py-2 transition hover:bg-brand-50 hover:text-brand-700">Produits</a>
+            <a href="#contact" className="rounded-full px-4 py-2 transition hover:bg-brand-50 hover:text-brand-700">Contact</a>
           </nav>
           <div className="flex items-center gap-2">
-            <a href={telLink} className="btn-ghost !border-transparent !bg-transparent !px-3 !py-2 !shadow-none hover:!bg-slate-100 sm:!px-4">
+            <a href={telLink} className="btn-soft !rounded-full !px-3 !py-2 sm:!px-4">
               <Phone size={16} /> <span className="hidden sm:inline">Appeler</span>
             </a>
-            <Link href="/connexion" className="btn-ghost !px-3 !py-2" title="Espace gérant">
-              <Lock size={16} /> <span className="hidden sm:inline">Espace gérant</span>
-            </Link>
           </div>
         </div>
       </header>
 
       {/* Héros */}
       <section id="top" className="storefront-hero relative isolate overflow-hidden">
-        <div aria-hidden="true" className="hero-orb hero-orb-one" />
-        <div aria-hidden="true" className="hero-orb hero-orb-two" />
-        <div className="relative mx-auto max-w-7xl px-4 pb-14 pt-10 sm:px-6 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-20">
-          <div className="grid items-center gap-10 md:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}>
-              <span className="inline-flex items-center gap-2 rounded-full border border-cyan-200/20 bg-white/[0.07] px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-100 shadow-lg shadow-blue-950/10 backdrop-blur">
-                <Sparkles size={14} className="text-cyan-300" /> L&apos;univers tech, simplement
+        <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-12 sm:pb-16 sm:pt-16 lg:pb-20 lg:pt-20">
+          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-100 shadow-sm backdrop-blur">
+                <Sparkles size={14} /> Bienvenue chez {shop.name}
               </span>
-              <h1 className="mt-6 max-w-2xl text-[2.65rem] font-extrabold leading-[1.04] tracking-[-0.045em] text-white sm:text-6xl lg:text-[4.25rem]">
-                Le bon choix.
-                <span className="mt-1 block bg-gradient-to-r from-cyan-200 via-sky-300 to-blue-200 bg-clip-text text-transparent">
-                  La bonne technologie.
-                </span>
+              <h1 className="mt-6 max-w-xl text-[2.75rem] font-black leading-[1.06] tracking-[-0.045em] text-white sm:text-6xl">
+                La technologie,
+                <span className="mt-1 block text-cyan-300">en toute simplicité.</span>
               </h1>
-              <p className="mt-5 max-w-lg text-base leading-relaxed text-blue-100/80 sm:text-lg">{shop.tagline} Découvrez une sélection pensée pour votre quotidien.</p>
+              <p className="mt-5 max-w-lg text-base leading-relaxed text-blue-100 sm:text-lg">{shop.tagline}</p>
+              <p className="mt-2 max-w-lg text-sm leading-relaxed text-slate-300">
+                Parcourez notre sélection et contactez-nous pour trouver l’équipement qui vous convient.
+              </p>
               <div className="mt-8 flex flex-col gap-3 min-[420px]:flex-row">
-                <a
-                  href="#produits"
-                  className="btn group !min-h-12 !justify-between !rounded-xl !bg-white !px-5 !text-brand-900 shadow-xl shadow-blue-950/20 transition hover:-translate-y-0.5 hover:!bg-cyan-50 min-[420px]:!justify-center"
-                >
-                  Explorer la boutique <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
+                <a href="#produits" className="btn-primary group !min-h-12 !justify-between !rounded-xl !px-5 shadow-lg shadow-brand-600/20 min-[420px]:!justify-center">
+                  Découvrir les produits <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
                 </a>
                 <a
                   href={waLink(`Bonjour ${shop.name}, j'aimerais avoir des informations.`)}
                   target="_blank"
                   rel="noreferrer"
-                  className="btn !min-h-12 !rounded-xl !bg-[#20c968] !px-5 !text-white shadow-xl shadow-emerald-950/20 transition hover:-translate-y-0.5 hover:!bg-[#18b85c]"
+                  className="btn !min-h-12 !rounded-xl !bg-[#20c968] !px-5 !text-white shadow-md transition hover:-translate-y-0.5 hover:!bg-[#18b85c]"
                 >
-                  <MessageCircle size={18} /> Écrivez-nous sur WhatsApp
+                  <MessageCircle size={18} /> Nous écrire sur WhatsApp
                 </a>
               </div>
-              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-blue-100/75">
-                <span className="inline-flex items-center gap-2"><Smartphone size={15} className="text-cyan-300" /> Téléphones</span>
-                <span className="inline-flex items-center gap-2"><Headphones size={15} className="text-cyan-300" /> Audio</span>
-                <span className="inline-flex items-center gap-2"><Laptop size={15} className="text-cyan-300" /> Informatique</span>
+              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm font-medium text-blue-100">
+                <span className="inline-flex items-center gap-2"><Smartphone size={16} className="text-cyan-300" /> Téléphones</span>
+                <span className="inline-flex items-center gap-2"><Headphones size={16} className="text-cyan-300" /> Audio</span>
+                <span className="inline-flex items-center gap-2"><Laptop size={16} className="text-cyan-300" /> Informatique</span>
               </div>
+              {shop.address && (
+                <p className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-slate-300">
+                  <MapPin size={15} className="shrink-0 text-cyan-300" /> Retrouvez-nous : {shop.address}
+                </p>
+              )}
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 12 }}
+              initial={{ opacity: 0, scale: 0.97, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.65 }}
-              className="relative mx-auto w-full max-w-[31rem]"
+              transition={{ delay: 0.1, duration: 0.55 }}
+              className="relative mx-auto w-full max-w-[34rem]"
             >
-              <div aria-hidden="true" className="absolute -inset-5 rounded-[3rem] bg-cyan-300/10 blur-2xl" />
-              <div className="hero-showcase relative grid aspect-[1.08/1] grid-cols-[1.15fr_0.85fr] gap-3 overflow-hidden rounded-[2rem] border border-white/15 p-3 shadow-2xl shadow-blue-950/40 sm:aspect-[1.2/1] sm:gap-4 sm:p-4">
-                {featured[0] ? (
-                  <button onClick={() => setOpen(featured[0])} className="group relative row-span-2 overflow-hidden rounded-3xl bg-white text-left shadow-2xl shadow-slate-950/20">
-                    <ProductImage name={featured[0].name} image={featured[0].image} className="transition duration-700 group-hover:scale-105" />
-                    <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-brand-800 shadow-sm backdrop-blur sm:left-4 sm:top-4 sm:text-[10px]">À découvrir</span>
-                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/50 to-transparent p-3 pt-12 text-white sm:p-5 sm:pt-16">
-                      <span className="block text-[9px] font-semibold uppercase tracking-wider text-cyan-200 sm:text-[10px]">{featured[0].category}</span>
-                      <span className="mt-1 block line-clamp-2 text-sm font-bold sm:text-lg">{featured[0].name}</span>
-                      <span className="mt-1 block text-sm font-extrabold sm:text-base">{money(featured[0].sellPrice)}</span>
+              <div className="hero-showcase relative overflow-hidden rounded-[2rem] p-6 text-white shadow-2xl shadow-slate-900/15 sm:p-8">
+                <div className="relative z-10 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-blue-100">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> L’univers {shop.name}
+                  </span>
+                  <Logo size={42} className="rounded-full bg-white/10 p-1 ring-1 ring-white/15" />
+                </div>
+                <h2 className="relative z-10 mt-8 max-w-sm text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">
+                  Tout pour rester connecté.
+                </h2>
+                <p className="relative z-10 mt-2 max-w-sm text-sm leading-relaxed text-blue-100/75">
+                  Téléphones, audio et accessoires pour accompagner votre quotidien.
+                </p>
+
+                <div className="relative mt-8 grid min-h-[14rem] grid-cols-[1fr_0.82fr] gap-3 sm:min-h-[16rem] sm:gap-4">
+                  <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-blue-500/30 to-white/[0.06] p-4 sm:p-5">
+                    <span className="absolute -right-7 -top-8 h-36 w-36 rounded-full border border-white/10" />
+                    <span className="absolute -right-2 -top-3 h-24 w-24 rounded-full border border-white/10" />
+                    <Smartphone size={58} strokeWidth={1.2} className="relative text-cyan-200 sm:h-[4.5rem] sm:w-[4.5rem]" />
+                    <span className="relative">
+                      <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-100/65">Au quotidien</span>
+                      <span className="mt-1 block text-sm font-bold sm:text-base">Téléphones & accessoires</span>
                     </span>
-                  </button>
-                ) : (
-                  <div className="row-span-2 flex flex-col items-center justify-center rounded-3xl bg-white/[0.08] p-5 text-center text-white">
-                    <Logo size={90} className="mb-4" />
-                    <span className="text-sm font-bold">Votre prochain coup de cœur</span>
-                    <span className="mt-1 text-xs text-blue-100/70">Découvrez notre sélection tech.</span>
                   </div>
-                )}
-                {featured.slice(1, 3).map((product) => (
-                  <button key={product.id} onClick={() => setOpen(product)} className="group relative min-h-0 overflow-hidden rounded-3xl bg-white text-left shadow-xl shadow-slate-950/15">
-                    <ProductImage name={product.name} image={product.image} className="transition duration-700 group-hover:scale-105" />
-                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 to-transparent px-3 pb-3 pt-9 text-white">
-                      <span className="block line-clamp-1 text-[10px] font-bold sm:text-xs">{product.name}</span>
-                      <span className="mt-0.5 block text-xs font-extrabold text-cyan-100">{money(product.sellPrice)}</span>
-                    </span>
-                  </button>
-                ))}
-                {featured.length < 2 && (
-                  <a href={waLink(`Bonjour ${shop.name}, j'aimerais avoir des informations.`)} target="_blank" rel="noreferrer" className="flex min-h-0 flex-col items-center justify-center gap-2 rounded-3xl border border-white/10 bg-slate-950/35 p-3 text-center text-white transition hover:bg-slate-950/50">
-                    <span className="rounded-2xl bg-emerald-400/15 p-3 text-emerald-300"><MessageCircle size={22} /></span>
-                    <span className="text-[10px] font-bold sm:text-xs">Un conseil ?</span>
-                    <span className="text-[9px] text-blue-100/70 sm:text-[10px]">Échangez avec notre équipe</span>
-                  </a>
-                )}
-              </div>
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/15 bg-slate-950/70 px-4 py-2 text-[9px] font-bold uppercase tracking-[0.2em] text-blue-100/80 shadow-lg backdrop-blur-xl sm:text-[10px]">
-                {shop.name} <span className="mx-1.5 text-cyan-300">·</span> Sélection tech
+                  <div className="grid grid-rows-2 gap-3 sm:gap-4">
+                    <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-3 sm:p-4">
+                      <span className="rounded-xl bg-cyan-200/10 p-2.5 text-cyan-200"><Headphones size={21} /></span>
+                      <span className="text-sm font-bold">Audio</span>
+                    </div>
+                    <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-3 sm:p-4">
+                      <span className="rounded-xl bg-indigo-200/10 p-2.5 text-indigo-200"><Laptop size={21} /></span>
+                      <span className="text-sm font-bold">Informatique</span>
+                    </div>
+                  </div>
+                </div>
+                <a href="#produits" className="group relative z-10 mt-5 inline-flex items-center gap-2 text-sm font-bold text-white transition hover:text-cyan-200">
+                  Voir la sélection <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                </a>
               </div>
             </motion.div>
           </div>
-
-          <div className="mt-14 grid gap-3 border-t border-white/10 pt-5 sm:grid-cols-3 sm:gap-5 lg:mt-16">
-            {[
-              { icon: Smartphone, title: "Explorez", text: "Parcourez le catalogue de la boutique." },
-              { icon: Sparkles, title: "Trouvez", text: "Découvrez les produits qui vous intéressent." },
-              { icon: MessageCircle, title: "Échangez", text: "Contactez-nous pour votre commande." },
-            ].map((item, index) => (
-              <div key={item.title} className="flex items-start gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-3.5 backdrop-blur-sm sm:border-transparent sm:bg-transparent sm:p-2">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-200/10 text-cyan-200">
-                  <item.icon size={17} />
-                </span>
-                <span>
-                  <span className="block text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-200/80">0{index + 1} · {item.title}</span>
-                  <span className="mt-1 block text-xs leading-relaxed text-blue-100/70">{item.text}</span>
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
-        <svg aria-hidden="true" className="absolute bottom-0 left-0 w-full text-[#f8fbff]" viewBox="0 0 1440 60" preserveAspectRatio="none" fill="currentColor">
-          <path d="M0,30 C360,70 1080,-10 1440,30 L1440,60 L0,60 Z" />
-        </svg>
+      </section>
+
+      <section aria-label="Les services de la boutique" className="mx-auto grid max-w-6xl gap-3 px-4 pb-10 pt-5 sm:grid-cols-3 sm:gap-4 sm:pb-14">
+        {[
+          { icon: Smartphone, title: `${db.products.length} produit${db.products.length > 1 ? "s" : ""}`, text: "Une sélection à parcourir en boutique." },
+          { icon: Sparkles, title: `${availableProducts} disponible${availableProducts > 1 ? "s" : ""}`, text: "Consultez les stocks affichés sur chaque produit." },
+          { icon: MessageCircle, title: "Commande directe", text: "Échangez avec notre équipe sur WhatsApp." },
+        ].map((item) => (
+          <div key={item.title} className="flex items-start gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-900/[0.02] sm:p-5">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+              <item.icon size={18} />
+            </span>
+            <span>
+              <span className="block text-sm font-bold text-slate-900">{item.title}</span>
+              <span className="mt-1 block text-xs leading-relaxed text-slate-500">{item.text}</span>
+            </span>
+          </div>
+        ))}
       </section>
 
       {/* Catalogue */}
-      <section id="produits" className="mx-auto max-w-7xl scroll-mt-20 px-4 pb-20 pt-10 sm:px-6 sm:pt-14">
-        <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-700">La sélection {shop.name}</span>
-            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">La technologie qui vous ressemble</h2>
-            <p className="mt-1.5 text-sm text-slate-500">Téléphones, audio, informatique et accessoires : découvrez notre catalogue.</p>
+      <section id="produits" className="mx-auto max-w-6xl scroll-mt-20 px-4 pb-20 pt-12 sm:pt-16">
+        <div className="mb-8 flex flex-col gap-5 rounded-[2rem] border border-blue-100/80 bg-white/75 p-5 shadow-[0_18px_50px_rgba(30,64,175,0.06)] sm:p-7 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-700 ring-1 ring-blue-100">
+              <Sparkles size={13} /> La sélection {shop.name}
+            </span>
+            <h2 className="mt-3 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Tout ce qu’il vous faut, au même endroit.</h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-500">Téléphones, audio, informatique et accessoires : trouvez votre prochain coup de cœur.</p>
           </div>
           <div className="relative w-full md:w-80 md:shrink-0">
             <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher un appareil…" className="input !pl-10" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher un appareil…" aria-label="Rechercher un produit" className="input !rounded-2xl !py-3 !pl-10 !shadow-sm" />
           </div>
         </div>
 
@@ -324,11 +321,12 @@ export function Storefront() {
       </section>
 
       {/* Contact + QR */}
-      <section id="contact" className="scroll-mt-20 border-y border-blue-100/70 bg-gradient-to-br from-white via-white to-blue-50/70 py-16 sm:py-20">
+      <section id="contact" className="scroll-mt-20 border-y border-blue-100/70 bg-gradient-to-br from-white via-blue-50/40 to-blue-100/50 py-16 sm:py-20">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-[1.3fr_1fr]">
           <div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Nous contacter</h2>
-            <p className="mt-1 text-slate-500">Une question ? Une commande ? {shop.manager} vous répond.</p>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-600">Toujours à votre écoute</span>
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">Parlons de votre prochain achat.</h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-500">Une question ou besoin d’un conseil ? {shop.manager} vous répond.</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {[
                 { icon: Phone, label: "Téléphone", value: shop.phone, href: telLink },
@@ -351,18 +349,18 @@ export function Storefront() {
                   </>
                 );
                 return c.href ? (
-                  <a key={c.label} href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noreferrer" className="card flex items-center gap-3 p-3.5 transition hover:-translate-y-0.5 hover:shadow-md">
+                  <a key={c.label} href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noreferrer" className="card flex items-center gap-3 !rounded-2xl !border-slate-100 p-3.5 transition hover:-translate-y-0.5 hover:!border-blue-100 hover:shadow-md">
                     {body}
                   </a>
                 ) : (
-                  <div key={c.label} className="card flex items-center gap-3 p-3.5">
+                  <div key={c.label} className="card flex items-center gap-3 !rounded-2xl !border-slate-100 p-3.5">
                     {body}
                   </div>
                 );
               })}
             </div>
           </div>
-          <div className="rounded-3xl bg-gradient-to-br from-brand-50 to-white p-6 ring-1 ring-brand-100">
+          <div className="min-w-0 rounded-3xl bg-gradient-to-br from-brand-50 to-white p-4 ring-1 ring-brand-100 sm:p-6">
             <QrCard />
           </div>
         </div>

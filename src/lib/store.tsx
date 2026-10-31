@@ -1,8 +1,10 @@
 "use client";
 
-import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { Customer, DB, Invoice, InvoiceItem, Movement, MovementType, Product } from "./types";
+import { useToast } from "@/components/ui";
 import { makeSeed } from "./seed";
+import { isSupabaseConfigured, requireSupabase, supabase } from "./supabase";
 import { uid } from "./utils";
 
 const KEY = "boutique-db-v1";
@@ -21,6 +23,7 @@ export interface InvoiceInput {
 interface Ctx {
   db: DB;
   ready: boolean;
+  error: string;
   saveProduct: (d: ProductInput, id?: string) => string;
   deleteProduct: (id: string) => void;
   moveStock: (productId: string, type: MovementType, delta: number, note: string) => void;
@@ -71,34 +74,145 @@ function applyItems(db: DB, items: InvoiceItem[], dir: 1 | -1, type: MovementTyp
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
+  const toast = useToast();
   const [db, setDb] = useState<DB>(EMPTY);
   const [ready, setReady] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const writeQueue = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      setDb(raw ? { ...EMPTY, ...JSON.parse(raw) } : makeSeed());
-    } catch {
-      setDb(makeSeed());
+    if (!isSupabaseConfigured || !supabase) {
+      setLoadError("La connexion Supabase n’est pas configurée. Vérifiez les variables d’environnement.");
+      setReady(true);
+      return;
     }
-    setReady(true);
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === KEY && e.newValue) {
-        try {
-          setDb({ ...EMPTY, ...JSON.parse(e.newValue) });
-        } catch {}
+
+    let active = true;
+    let loadVersion = 0;
+    const client = supabase;
+
+    const loadStore = async (hasSession: boolean) => {
+      if (!active) return;
+      const version = ++loadVersion;
+      setReady(false);
+      setLoadError("");
+      try {
+        let nextDb = EMPTY;
+        let admin = false;
+
+        if (hasSession) {
+          const { data: allowed, error: roleError } = await client.rpc("is_shop_admin");
+          if (roleError) throw new Error(`Vérification des droits impossible : ${roleError.message}`);
+          admin = Boolean(allowed);
+        }
+
+        if (admin) {
+          const { data: remoteState, error: stateError } = await client.rpc("get_shop_state");
+          if (stateError) throw new Error(`Chargement des données impossible : ${stateError.message}`);
+
+          if (remoteState) {
+            const state = remoteState as Partial<DB>;
+            if (
+              !Array.isArray(state.products) ||
+              !Array.isArray(state.movements) ||
+              !Array.isArray(state.customers) ||
+              !Array.isArray(state.invoices)
+            ) {
+              throw new Error("Les données Supabase ont un format invalide.");
+            }
+            nextDb = { ...EMPTY, ...state };
+          } else {
+            let localState: DB | null = null;
+            try {
+              const raw = localStorage.getItem(KEY);
+              if (raw) {
+                const parsed = JSON.parse(raw) as Partial<DB>;
+                if (
+                  Array.isArray(parsed.products) &&
+                  Array.isArray(parsed.movements) &&
+                  Array.isArray(parsed.customers) &&
+                  Array.isArray(parsed.invoices)
+                ) {
+                  localState = { ...EMPTY, ...parsed };
+                }
+              }
+            } catch (error) {
+              console.error("La copie locale de la boutique ne peut pas être migrée.", error);
+            }
+            nextDb = localState ?? EMPTY;
+            const { error: migrationError } = await client.rpc("save_shop_state", { payload: nextDb });
+            if (migrationError) throw new Error(`Migration initiale impossible : ${migrationError.message}`);
+          }
+        } else {
+          const { data: products, error: productsError } = await client.rpc("get_public_products");
+          if (productsError) throw new Error(`Chargement du catalogue public impossible : ${productsError.message}`);
+          const publicProducts = Array.isArray(products) ? products : [];
+          nextDb = {
+            ...EMPTY,
+            products: publicProducts.map((product) => ({
+              ...product,
+              buyPrice: 0,
+              stock: Number(product.stock) || 0,
+              minStock: Number(product.minStock) || 0,
+            })) as Product[],
+          };
+        }
+
+        if (!active || version !== loadVersion) return;
+        setDb(nextDb);
+        setIsAdmin(admin);
+        setLoadError("");
+        setReady(true);
+      } catch (error) {
+        if (!active || version !== loadVersion) return;
+        const message = error instanceof Error ? error.message : "Chargement des données de la boutique impossible.";
+        setLoadError(message);
+        setIsAdmin(false);
+        setReady(true);
+        console.error("Erreur de connexion Supabase.", error);
       }
     };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+
+    client.auth.getSession().then(({ data, error }) => {
+      if (error) throw error;
+      return loadStore(Boolean(data.session));
+    }).catch((error: unknown) => {
+      if (!active) return;
+      const message = error instanceof Error ? error.message : "Lecture de la session Supabase impossible.";
+      setLoadError(message);
+      setReady(true);
+      console.error("Erreur de session Supabase.", error);
+    });
+
+    const { data: authListener } = client.auth.onAuthStateChange((_event, session) => {
+      void loadStore(Boolean(session));
+    });
+
+    return () => {
+      active = false;
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || !isAdmin || loadError) return;
     try {
       localStorage.setItem(KEY, JSON.stringify(db));
     } catch {}
-  }, [db, ready]);
+    writeQueue.current = writeQueue.current
+      .then(async () => {
+        const client = requireSupabase();
+        const { error } = await client.rpc("save_shop_state", { payload: db });
+        if (error) throw new Error(`Enregistrement des données impossible : ${error.message}`);
+      })
+      .catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : "Enregistrement Supabase impossible.";
+        setLoadError(message);
+        toast(message, "error");
+        console.error("Erreur d’enregistrement Supabase.", error);
+      });
+  }, [db, ready, isAdmin, loadError, toast]);
 
   const saveProduct = useCallback((d: ProductInput, id?: string) => {
     const pid = id ?? uid();
@@ -218,6 +332,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     () => ({
       db,
       ready,
+      error: loadError,
       saveProduct,
       deleteProduct,
       moveStock,
@@ -229,7 +344,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       resetDemo,
       clearAll,
     }),
-    [db, ready, saveProduct, deleteProduct, moveStock, applyInventory, saveCustomer, createInvoice, convertQuote, deleteInvoice, resetDemo, clearAll]
+    [db, ready, loadError, saveProduct, deleteProduct, moveStock, applyInventory, saveCustomer, createInvoice, convertQuote, deleteInvoice, resetDemo, clearAll]
+  );
+
+  return (
+    <StoreCtx.Provider value={value}>
+      {children}
+      {loadError && (
+        <div role="alert" className="no-print fixed inset-x-4 bottom-4 z-[80] mx-auto max-w-xl rounded-2xl border border-rose-200 bg-white p-4 text-sm font-medium text-rose-800 shadow-xl">
+          {loadError}
+        </div>
+      )}
+    </StoreCtx.Provider>
   );
 
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>;
