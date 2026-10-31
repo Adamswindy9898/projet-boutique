@@ -30,7 +30,7 @@ function ProductCard({ p, onOpen }: { p: Product; onOpen: (p: Product) => void }
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ y: -4 }}
       transition={{ type: "spring", stiffness: 260, damping: 24 }}
-      className="group card flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-[0_18px_40px_rgba(37,99,235,0.12)]"
+      className="group card flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-[0_18px_40px_rgba(15,23,42,0.1)]"
     >
       <button onClick={() => onOpen(p)} className="relative block aspect-square overflow-hidden text-left">
         <div className={cn("h-full w-full transition duration-500 group-hover:scale-105", out && "grayscale")}>
@@ -43,7 +43,7 @@ function ProductCard({ p, onOpen }: { p: Product; onOpen: (p: Product) => void }
           {out ? "Stock : 0" : `Stock : ${p.stock}`}
         </span>
       </button>
-      <div className="flex flex-1 flex-col p-3.5">
+      <div className="flex flex-1 flex-col p-4">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-600">{p.category}</p>
         <h3 className="mt-0.5 line-clamp-2 text-sm font-bold text-slate-900">{p.name}</h3>
         <p className="mt-1 text-lg font-extrabold text-slate-900">{money(p.sellPrice)}</p>
@@ -126,6 +126,7 @@ export function Storefront() {
   const [cat, setCat] = useState("Tous");
   const [open, setOpen] = useState<Product | null>(null);
 
+  const featured = db.products.filter((p) => p.stock > 0).slice(0, 3);
   const categories = useMemo(() => ["Tous", ...Array.from(new Set(db.products.map((p) => p.category))).filter(Boolean)], [db.products]);
   const list = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -135,8 +136,8 @@ export function Storefront() {
   return (
     <div className="storefront-shell min-h-screen">
       {/* Barre de navigation */}
-      <header className="sticky top-0 z-40 border-b border-white/70 bg-white/85 shadow-[0_4px_24px_rgba(15,23,42,0.04)] backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5 sm:py-3">
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 shadow-[0_4px_24px_rgba(15,23,42,0.04)] backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5 sm:px-6 sm:py-3">
           <a href="#top" className="flex items-center gap-2.5">
             <Logo size={42} />
             <span>
@@ -144,12 +145,12 @@ export function Storefront() {
               <span className="hidden text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-600 sm:block">Technologie & accessoires</span>
             </span>
           </a>
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-600 md:flex">
-            <a href="#produits" className="hover:text-brand-700">Produits</a>
-            <a href="#contact" className="hover:text-brand-700">Contact</a>
+          <nav className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
+            <a href="#produits" className="transition hover:text-brand-700">Nos produits</a>
+            <a href="#contact" className="transition hover:text-brand-700">Nous contacter</a>
           </nav>
           <div className="flex items-center gap-2">
-            <a href={telLink} className="btn-soft !px-3 !py-2 sm:!px-4">
+            <a href={telLink} className="btn-ghost !border-transparent !bg-transparent !px-3 !py-2 !shadow-none hover:!bg-slate-100 sm:!px-4">
               <Phone size={16} /> <span className="hidden sm:inline">Appeler</span>
             </a>
             <Link href="/connexion" className="btn-ghost !px-3 !py-2" title="Espace gérant">
@@ -163,23 +164,23 @@ export function Storefront() {
       <section id="top" className="storefront-hero relative isolate overflow-hidden">
         <div aria-hidden="true" className="hero-orb hero-orb-one" />
         <div aria-hidden="true" className="hero-orb hero-orb-two" />
-        <div className="relative mx-auto max-w-6xl px-4 pb-14 pt-10 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-20">
-          <div className="grid items-center gap-10 md:grid-cols-[1.05fr_0.95fr] lg:gap-14">
+        <div className="relative mx-auto max-w-7xl px-4 pb-14 pt-10 sm:px-6 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-20">
+          <div className="grid items-center gap-10 md:grid-cols-[1.05fr_0.95fr] lg:gap-16">
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}>
-              <span className="inline-flex items-center gap-2 rounded-full border border-cyan-200/20 bg-white/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-100 shadow-lg shadow-blue-950/10 backdrop-blur">
-                <Sparkles size={14} className="text-cyan-300" /> Bienvenue chez {shop.name}
+              <span className="inline-flex items-center gap-2 rounded-full border border-cyan-200/20 bg-white/[0.07] px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-100 shadow-lg shadow-blue-950/10 backdrop-blur">
+                <Sparkles size={14} className="text-cyan-300" /> L&apos;univers tech, simplement
               </span>
-              <h1 className="mt-6 max-w-2xl text-[2.65rem] font-black leading-[1.04] tracking-[-0.045em] text-white sm:text-6xl lg:text-[4.25rem]">
-                La technologie
+              <h1 className="mt-6 max-w-2xl text-[2.65rem] font-extrabold leading-[1.04] tracking-[-0.045em] text-white sm:text-6xl lg:text-[4.25rem]">
+                Le bon choix.
                 <span className="mt-1 block bg-gradient-to-r from-cyan-200 via-sky-300 to-blue-200 bg-clip-text text-transparent">
-                  à portée de main.
+                  La bonne technologie.
                 </span>
               </h1>
-              <p className="mt-5 max-w-lg text-base leading-relaxed text-blue-100/90 sm:text-lg">{shop.tagline}</p>
+              <p className="mt-5 max-w-lg text-base leading-relaxed text-blue-100/80 sm:text-lg">{shop.tagline} Découvrez une sélection pensée pour votre quotidien.</p>
               <div className="mt-8 flex flex-col gap-3 min-[420px]:flex-row">
                 <a
                   href="#produits"
-                  className="btn group !min-h-12 !justify-between !rounded-2xl !bg-white !px-5 !text-brand-800 shadow-xl shadow-blue-950/20 transition hover:-translate-y-0.5 hover:!bg-cyan-50 min-[420px]:!justify-center"
+                  className="btn group !min-h-12 !justify-between !rounded-xl !bg-white !px-5 !text-brand-900 shadow-xl shadow-blue-950/20 transition hover:-translate-y-0.5 hover:!bg-cyan-50 min-[420px]:!justify-center"
                 >
                   Explorer la boutique <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
                 </a>
@@ -187,7 +188,7 @@ export function Storefront() {
                   href={waLink(`Bonjour ${shop.name}, j'aimerais avoir des informations.`)}
                   target="_blank"
                   rel="noreferrer"
-                  className="btn !min-h-12 !rounded-2xl !bg-[#20c968] !px-5 !text-white shadow-xl shadow-emerald-950/20 transition hover:-translate-y-0.5 hover:!bg-[#18b85c]"
+                  className="btn !min-h-12 !rounded-xl !bg-[#20c968] !px-5 !text-white shadow-xl shadow-emerald-950/20 transition hover:-translate-y-0.5 hover:!bg-[#18b85c]"
                 >
                   <MessageCircle size={18} /> Écrivez-nous sur WhatsApp
                 </a>
@@ -203,28 +204,46 @@ export function Storefront() {
               initial={{ opacity: 0, scale: 0.94, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.65 }}
-              className="relative mx-auto w-full max-w-[25rem]"
+              className="relative mx-auto w-full max-w-[31rem]"
             >
               <div aria-hidden="true" className="absolute -inset-5 rounded-[3rem] bg-cyan-300/10 blur-2xl" />
-              <div className="hero-showcase relative flex aspect-[1.08/1] items-center justify-center overflow-hidden rounded-[2rem] border border-white/15 shadow-2xl shadow-blue-950/40 sm:aspect-[1.2/1]">
-                <div aria-hidden="true" className="absolute inset-5 rounded-[1.5rem] border border-white/[0.08]" />
-                <div aria-hidden="true" className="hero-ring absolute h-[78%] aspect-square rounded-full border border-cyan-200/15" />
-                <div aria-hidden="true" className="hero-ring hero-ring-inner absolute h-[58%] aspect-square rounded-full border border-white/10" />
-                <div aria-hidden="true" className="absolute h-[48%] aspect-square rounded-full bg-blue-400/20 blur-2xl" />
-                <Logo size={168} className="relative z-10 !h-36 !w-36 shadow-[0_20px_60px_rgba(0,0,0,0.35)] sm:!h-44 sm:!w-44" />
-                <div className="absolute left-4 top-5 flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-950/35 px-3 py-2.5 text-white shadow-xl backdrop-blur-xl sm:left-6 sm:top-7">
-                  <span className="rounded-xl bg-cyan-300/15 p-2 text-cyan-200"><Smartphone size={17} /></span>
-                  <span><span className="block text-[9px] font-semibold uppercase tracking-wider text-blue-100/70">Univers</span><span className="block text-xs font-bold">Mobile & tech</span></span>
-                </div>
-                <div className="absolute bottom-5 right-4 flex items-center gap-2 rounded-2xl border border-white/15 bg-white/[0.92] px-3 py-2.5 shadow-xl sm:bottom-7 sm:right-6">
-                  <span className="rounded-xl bg-emerald-100 p-2 text-emerald-700"><MessageCircle size={17} /></span>
-                  <span><span className="block text-[9px] font-semibold uppercase tracking-wider text-slate-500">Contact direct</span><span className="block text-xs font-extrabold text-slate-900">WhatsApp</span></span>
-                </div>
-                <div aria-hidden="true" className="absolute right-[18%] top-[23%] h-2 w-2 rounded-full bg-cyan-200 shadow-[0_0_22px_5px_rgba(103,232,249,0.55)]" />
-                <div aria-hidden="true" className="absolute bottom-[23%] left-[18%] h-1.5 w-1.5 rounded-full bg-blue-200 shadow-[0_0_18px_4px_rgba(147,197,253,0.5)]" />
+              <div className="hero-showcase relative grid aspect-[1.08/1] grid-cols-[1.15fr_0.85fr] gap-3 overflow-hidden rounded-[2rem] border border-white/15 p-3 shadow-2xl shadow-blue-950/40 sm:aspect-[1.2/1] sm:gap-4 sm:p-4">
+                {featured[0] ? (
+                  <button onClick={() => setOpen(featured[0])} className="group relative row-span-2 overflow-hidden rounded-3xl bg-white text-left shadow-2xl shadow-slate-950/20">
+                    <ProductImage name={featured[0].name} image={featured[0].image} className="transition duration-700 group-hover:scale-105" />
+                    <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-brand-800 shadow-sm backdrop-blur sm:left-4 sm:top-4 sm:text-[10px]">À découvrir</span>
+                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/50 to-transparent p-3 pt-12 text-white sm:p-5 sm:pt-16">
+                      <span className="block text-[9px] font-semibold uppercase tracking-wider text-cyan-200 sm:text-[10px]">{featured[0].category}</span>
+                      <span className="mt-1 block line-clamp-2 text-sm font-bold sm:text-lg">{featured[0].name}</span>
+                      <span className="mt-1 block text-sm font-extrabold sm:text-base">{money(featured[0].sellPrice)}</span>
+                    </span>
+                  </button>
+                ) : (
+                  <div className="row-span-2 flex flex-col items-center justify-center rounded-3xl bg-white/[0.08] p-5 text-center text-white">
+                    <Logo size={90} className="mb-4" />
+                    <span className="text-sm font-bold">Votre prochain coup de cœur</span>
+                    <span className="mt-1 text-xs text-blue-100/70">Découvrez notre sélection tech.</span>
+                  </div>
+                )}
+                {featured.slice(1, 3).map((product) => (
+                  <button key={product.id} onClick={() => setOpen(product)} className="group relative min-h-0 overflow-hidden rounded-3xl bg-white text-left shadow-xl shadow-slate-950/15">
+                    <ProductImage name={product.name} image={product.image} className="transition duration-700 group-hover:scale-105" />
+                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 to-transparent px-3 pb-3 pt-9 text-white">
+                      <span className="block line-clamp-1 text-[10px] font-bold sm:text-xs">{product.name}</span>
+                      <span className="mt-0.5 block text-xs font-extrabold text-cyan-100">{money(product.sellPrice)}</span>
+                    </span>
+                  </button>
+                ))}
+                {featured.length < 2 && (
+                  <a href={waLink(`Bonjour ${shop.name}, j'aimerais avoir des informations.`)} target="_blank" rel="noreferrer" className="flex min-h-0 flex-col items-center justify-center gap-2 rounded-3xl border border-white/10 bg-slate-950/35 p-3 text-center text-white transition hover:bg-slate-950/50">
+                    <span className="rounded-2xl bg-emerald-400/15 p-3 text-emerald-300"><MessageCircle size={22} /></span>
+                    <span className="text-[10px] font-bold sm:text-xs">Un conseil ?</span>
+                    <span className="text-[9px] text-blue-100/70 sm:text-[10px]">Échangez avec notre équipe</span>
+                  </a>
+                )}
               </div>
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-white/15 bg-slate-950/50 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-blue-100/80 shadow-lg backdrop-blur-xl">
-                {shop.name} <span className="mx-1.5 text-cyan-300">·</span> Technologie & accessoires
+              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/15 bg-slate-950/70 px-4 py-2 text-[9px] font-bold uppercase tracking-[0.2em] text-blue-100/80 shadow-lg backdrop-blur-xl sm:text-[10px]">
+                {shop.name} <span className="mx-1.5 text-cyan-300">·</span> Sélection tech
               </div>
             </motion.div>
           </div>
@@ -253,11 +272,11 @@ export function Storefront() {
       </section>
 
       {/* Catalogue */}
-      <section id="produits" className="mx-auto max-w-6xl scroll-mt-20 px-4 pb-20 pt-10 sm:pt-14">
+      <section id="produits" className="mx-auto max-w-7xl scroll-mt-20 px-4 pb-20 pt-10 sm:px-6 sm:pt-14">
         <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-600">La sélection OUSMATECH</span>
-            <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Trouvez votre prochain coup de cœur</h2>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-700">La sélection {shop.name}</span>
+            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">La technologie qui vous ressemble</h2>
             <p className="mt-1.5 text-sm text-slate-500">Téléphones, audio, informatique et accessoires : découvrez notre catalogue.</p>
           </div>
           <div className="relative w-full md:w-80 md:shrink-0">

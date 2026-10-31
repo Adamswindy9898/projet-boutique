@@ -41,9 +41,10 @@ export default function FactureDetailPage() {
     `\nMerci de votre confiance !`;
 
   const share = async () => {
-    if (typeof navigator !== "undefined" && "share" in navigator) {
+    const shareApi = navigator.share;
+    if (typeof shareApi === "function") {
       try {
-        await navigator.share({ title: `${title} ${inv.number}`, text });
+        await shareApi.call(navigator, { title: `${title} ${inv.number}`, text });
         return;
       } catch {
         return;

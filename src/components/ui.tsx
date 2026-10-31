@@ -109,17 +109,17 @@ export const useToast = () => useContext(ToastCtx);
 /* ---------- Petits blocs ---------- */
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
   return (
-    <div className="relative mb-7 overflow-hidden rounded-[1.75rem] border border-blue-100/80 bg-gradient-to-br from-white via-blue-50/90 to-indigo-100/60 p-5 shadow-[0_14px_38px_rgba(37,99,235,0.07)] sm:p-7">
-      <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-20 h-56 w-56 rounded-full bg-blue-200/30 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute bottom-0 right-1/3 h-24 w-24 rounded-full bg-cyan-200/20 blur-2xl" />
+    <div className="relative mb-7 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.055)] sm:p-7">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-1.5 bg-gradient-to-b from-brand-400 via-brand-600 to-cyan-400" />
+      <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-24 h-64 w-64 rounded-full bg-brand-100/70 blur-3xl" />
       <div className="relative flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <span className="mb-2 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-brand-700 shadow-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-500" />
+          <span className="mb-2 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />
             Espace de gestion
           </span>
-          <h1 className="text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">{title}</h1>
-          {subtitle && <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">{subtitle}</p>}
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{title}</h1>
+          {subtitle && <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-500 sm:text-base">{subtitle}</p>}
         </div>
         {actions && <div className="no-print flex w-full flex-wrap items-center gap-2 sm:w-auto">{actions}</div>}
       </div>
@@ -146,9 +146,9 @@ export function StatCard({
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -3 }}
       transition={{ duration: 0.2 }}
-      className="card group relative overflow-hidden p-4 transition-shadow hover:shadow-[0_18px_42px_rgba(37,99,235,0.12)] sm:p-5"
+      className="card group relative overflow-hidden p-4 transition-shadow hover:shadow-[0_18px_42px_rgba(15,23,42,0.1)] sm:p-5"
     >
-      <div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-blue-50/80 blur-2xl transition-colors group-hover:bg-blue-100" />
+      <div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-brand-50/80 blur-2xl transition-colors group-hover:bg-brand-100" />
       <div className="flex items-start justify-between">
         <p className="relative pt-1 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">{label}</p>
         <span className={cn("relative rounded-2xl p-2.5 shadow-sm ring-1 ring-black/[0.03]", tone)}>
@@ -157,7 +157,7 @@ export function StatCard({
       </div>
       <p className="relative mt-3 break-words text-xl font-black tracking-tight text-slate-950 sm:text-2xl">{value}</p>
       {sub && <div className="relative mt-1.5 text-xs">{sub}</div>}
-      <div aria-hidden="true" className="absolute inset-x-4 bottom-0 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-brand-400 to-cyan-400 transition-transform duration-300 group-hover:scale-x-100" />
+      <div aria-hidden="true" className="absolute inset-x-4 bottom-0 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-brand-500 to-cyan-400 transition-transform duration-300 group-hover:scale-x-100" />
     </motion.div>
   );
 }
