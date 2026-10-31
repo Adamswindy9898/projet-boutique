@@ -7,31 +7,66 @@ import { motion } from "framer-motion";
 import { ArrowLeft, KeyRound, RotateCcw, UserRound } from "lucide-react";
 import { shop } from "@/config/shop";
 import { Logo } from "@/components/Logo";
-import { loginUser, resetAdminAccess, restoreAuthSession } from "@/lib/auth";
+import { finishPasswordRecovery, loginUser, resetAdminAccess, restoreAuthSession } from "@/lib/auth";
+import { isSupabaseConfigured, requireSupabase } from "@/lib/supabase";
 
 export default function ConnexionPage() {
   const router = useRouter();
-  const [username, setUsername] = useState(shop.initialAdminUsername);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const [busy, setBusy] = useState(false);
   const [showRecovery, setShowRecovery] = useState(false);
-  const [recoveryDetails, setRecoveryDetails] = useState<{ username: string; password: string } | null>(null);
+  const [recovering, setRecovering] = useState(false);
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setError("L’authentification Supabase n’est pas encore configurée.");
+      return;
+    }
+    let active = true;
+    const client = requireSupabase();
+    const recoveryLink = new URLSearchParams(window.location.search).get("recovery") === "1";
+    setRecovering(recoveryLink);
+    const { data: listener } = client.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY" && active) {
+        setRecovering(true);
+        setShowRecovery(false);
+        setInfo("Choisissez un nouveau mot de passe.");
+      }
+    });
     restoreAuthSession()
       .then((session) => {
-        if (session) router.replace("/admin");
+        if (active && session && !recoveryLink) router.replace("/admin");
       })
-      .catch(() => setError("Impossible de vérifier les comptes sur cet appareil."));
+      .catch((reason: unknown) => {
+        if (active) setError(reason instanceof Error ? reason.message : "Impossible de vérifier la session.");
+      });
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
   }, [router]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     setError("");
+    setInfo("");
     try {
-      const session = await loginUser(username, password);
+      if (recovering) {
+        if (newPassword !== confirmPassword) {
+          setError("Les deux nouveaux mots de passe ne correspondent pas.");
+          return;
+        }
+        await finishPasswordRecovery(newPassword);
+        router.replace("/admin");
+        return;
+      }
+      const session = await loginUser(email, password);
       if (!session) {
         setError("Identifiant ou mot de passe incorrect.");
         setPassword("");
@@ -48,11 +83,10 @@ export default function ConnexionPage() {
   const recoverAdmin = async () => {
     setBusy(true);
     setError("");
+    setInfo("");
     try {
-      const credentials = await resetAdminAccess();
-      setUsername(credentials.username);
-      setPassword("");
-      setRecoveryDetails(credentials);
+      await resetAdminAccess(email);
+      setInfo("Si cette adresse correspond au compte gérant, un lien de réinitialisation lui sera envoyé.");
       setShowRecovery(false);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Réinitialisation impossible.");
@@ -78,51 +112,54 @@ export default function ConnexionPage() {
           <h1 className="mt-4 text-xl font-extrabold text-slate-900">Espace gérant</h1>
           <p className="text-sm text-slate-500">{shop.name}</p>
         </div>
-        <label htmlFor="username" className="label mt-6">Identifiant</label>
-        <div className="relative">
-          <UserRound size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            id="username"
-            autoComplete="username"
-            autoFocus
-            required
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Votre identifiant"
-            className="input !pl-10"
-          />
-        </div>
-        <label htmlFor="password" className="label mt-4">Mot de passe</label>
-        <div className="relative">
-          <KeyRound size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Votre mot de passe"
-            className="input !pl-10"
-          />
-        </div>
-        {error && <p role="alert" className="mt-3 text-center text-sm font-medium text-rose-600">{error}</p>}
-        {recoveryDetails && (
-          <div role="status" className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-            <p className="font-bold">Accès administrateur réinitialisé sur cet appareil.</p>
-            <p className="mt-2">Identifiant : <strong>{recoveryDetails.username}</strong></p>
-            <p>Mot de passe : <strong className="select-all">{recoveryDetails.password}</strong></p>
-            <p className="mt-2 text-xs">Les comptes utilisateurs et les données de la boutique n’ont pas été supprimés.</p>
-          </div>
+        {!recovering && (
+          <>
+            <label htmlFor="email" className="label mt-6">Adresse e-mail</label>
+            <div className="relative">
+              <UserRound size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                id="email"
+                type="email"
+                autoComplete="username"
+                autoFocus
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Votre adresse e-mail"
+                className="input !pl-10"
+              />
+            </div>
+            <label htmlFor="password" className="label mt-4">Mot de passe</label>
+            <div className="relative">
+              <KeyRound size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Votre mot de passe"
+                className="input !pl-10"
+              />
+            </div>
+          </>
         )}
+        {recovering && (
+          <>
+            <p className="mt-6 text-sm text-slate-600">Choisissez un nouveau mot de passe sécurisé.</p>
+            <label htmlFor="new-password" className="label mt-4">Nouveau mot de passe</label>
+            <input id="new-password" type="password" autoComplete="new-password" minLength={8} required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="input" />
+            <label htmlFor="confirm-password" className="label mt-4">Confirmer le mot de passe</label>
+            <input id="confirm-password" type="password" autoComplete="new-password" minLength={8} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="input" />
+          </>
+        )}
+        {error && <p role="alert" className="mt-3 text-center text-sm font-medium text-rose-600">{error}</p>}
+        {info && <p role="status" className="mt-3 text-center text-sm text-emerald-700">{info}</p>}
         <button type="submit" disabled={busy} className="btn-primary mt-5 w-full !py-3">
-          {busy ? "Connexion…" : "Se connecter"}
+          {busy ? "Veuillez patienter…" : recovering ? "Enregistrer le nouveau mot de passe" : "Se connecter"}
         </button>
-        <p className="mt-3 text-center text-xs text-slate-500">
-          Première connexion : <span className="font-semibold">{shop.initialAdminUsername}</span> /{" "}
-          <span className="font-semibold">{shop.initialAdminPassword}</span>
-        </p>
-        <div className="mt-4 border-t border-slate-100 pt-4 text-center">
+        {!recovering && <div className="mt-4 border-t border-slate-100 pt-4 text-center">
           {!showRecovery ? (
             <button type="button" onClick={() => setShowRecovery(true)} className="text-sm font-semibold text-brand-700 hover:text-brand-900">
               Mot de passe oublié ?
@@ -130,17 +167,17 @@ export default function ConnexionPage() {
           ) : (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-left">
               <p className="text-xs leading-relaxed text-amber-900">
-                Réinitialise le compte administrateur sur ce navigateur. Les autres comptes et les données de la boutique seront conservés.
+                Un lien de réinitialisation sera envoyé à l’adresse du compte gérant.
               </p>
               <div className="mt-3 flex flex-wrap justify-end gap-2">
                 <button type="button" onClick={() => setShowRecovery(false)} className="btn-ghost !px-3 !py-2 text-xs">Annuler</button>
-                <button type="button" disabled={busy} onClick={recoverAdmin} className="btn-primary !px-3 !py-2 text-xs">
-                  <RotateCcw size={14} /> Réinitialiser l’accès
+                <button type="button" disabled={busy || !email} onClick={recoverAdmin} className="btn-primary !px-3 !py-2 text-xs">
+                  <RotateCcw size={14} /> Envoyer le lien
                 </button>
               </div>
             </div>
           )}
-        </div>
+        </div>}
         <Link href="/" className="mt-4 flex items-center justify-center gap-1.5 text-sm font-medium text-slate-500 hover:text-brand-700">
           <ArrowLeft size={14} /> Retour à la boutique
         </Link>

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { Boxes, ClipboardCheck, ExternalLink, FileText, History, LayoutDashboard, LogOut, Package, Settings, Users } from "lucide-react";
 import { shop } from "@/config/shop";
-import { AUTH_KEY, restoreAuthSession } from "@/lib/auth";
+import { restoreAuthSession, signOut } from "@/lib/auth";
 import type { AuthSession } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
@@ -59,12 +59,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     );
 
   const active = (href: string) => (href === "/admin" ? path === "/admin" : path.startsWith(href));
-  const logout = () => {
+  const logout = async () => {
     try {
-      localStorage.removeItem(AUTH_KEY);
+      await signOut();
       router.push("/");
-    } catch {
-      toast("Déconnexion impossible sur cet appareil.", "error");
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Déconnexion impossible.", "error");
     }
   };
 

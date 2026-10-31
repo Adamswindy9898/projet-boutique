@@ -162,100 +162,111 @@ export function Storefront() {
 
       {/* Héros */}
       <section id="top" className="storefront-hero relative isolate overflow-hidden">
-        <div aria-hidden="true" className="hero-orb hero-orb-one" />
-        <div aria-hidden="true" className="hero-orb hero-orb-two" />
-        <div className="relative mx-auto max-w-6xl px-4 pb-14 pt-10 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-20">
-          <div className="grid items-center gap-10 md:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}>
-              <span className="inline-flex items-center gap-2 rounded-full border border-cyan-200/20 bg-white/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-100 shadow-lg shadow-blue-950/10 backdrop-blur">
-                <Sparkles size={14} className="text-cyan-300" /> Bienvenue chez {shop.name}
+        <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-12 sm:pb-16 sm:pt-16 lg:pb-20 lg:pt-20">
+          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+              <span className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-brand-700 shadow-sm">
+                <Sparkles size={14} /> Bienvenue chez {shop.name}
               </span>
-              <h1 className="mt-6 max-w-2xl text-[2.65rem] font-black leading-[1.04] tracking-[-0.045em] text-white sm:text-6xl lg:text-[4.25rem]">
-                La technologie
-                <span className="mt-1 block bg-gradient-to-r from-cyan-200 via-sky-300 to-blue-200 bg-clip-text text-transparent">
-                  à portée de main.
-                </span>
+              <h1 className="mt-6 max-w-xl text-[2.75rem] font-black leading-[1.06] tracking-[-0.045em] text-slate-950 sm:text-6xl">
+                La technologie,
+                <span className="mt-1 block text-brand-600">en toute simplicité.</span>
               </h1>
-              <p className="mt-5 max-w-lg text-base leading-relaxed text-blue-100/90 sm:text-lg">{shop.tagline}</p>
+              <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-600 sm:text-lg">{shop.tagline}</p>
+              <p className="mt-2 max-w-lg text-sm leading-relaxed text-slate-500">
+                Parcourez notre sélection et contactez-nous pour trouver l’équipement qui vous convient.
+              </p>
               <div className="mt-8 flex flex-col gap-3 min-[420px]:flex-row">
-                <a
-                  href="#produits"
-                  className="btn group !min-h-12 !justify-between !rounded-2xl !bg-white !px-5 !text-brand-800 shadow-xl shadow-blue-950/20 transition hover:-translate-y-0.5 hover:!bg-cyan-50 min-[420px]:!justify-center"
-                >
-                  Explorer la boutique <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
+                <a href="#produits" className="btn-primary group !min-h-12 !justify-between !rounded-xl !px-5 shadow-lg shadow-brand-600/20 min-[420px]:!justify-center">
+                  Découvrir les produits <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
                 </a>
                 <a
                   href={waLink(`Bonjour ${shop.name}, j'aimerais avoir des informations.`)}
                   target="_blank"
                   rel="noreferrer"
-                  className="btn !min-h-12 !rounded-2xl !bg-[#20c968] !px-5 !text-white shadow-xl shadow-emerald-950/20 transition hover:-translate-y-0.5 hover:!bg-[#18b85c]"
+                  className="btn !min-h-12 !rounded-xl !bg-[#20c968] !px-5 !text-white shadow-md transition hover:-translate-y-0.5 hover:!bg-[#18b85c]"
                 >
-                  <MessageCircle size={18} /> Écrivez-nous sur WhatsApp
+                  <MessageCircle size={18} /> Nous écrire sur WhatsApp
                 </a>
               </div>
-              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-blue-100/75">
-                <span className="inline-flex items-center gap-2"><Smartphone size={15} className="text-cyan-300" /> Téléphones</span>
-                <span className="inline-flex items-center gap-2"><Headphones size={15} className="text-cyan-300" /> Audio</span>
-                <span className="inline-flex items-center gap-2"><Laptop size={15} className="text-cyan-300" /> Informatique</span>
+              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm font-medium text-slate-600">
+                <span className="inline-flex items-center gap-2"><Smartphone size={16} className="text-brand-600" /> Téléphones</span>
+                <span className="inline-flex items-center gap-2"><Headphones size={16} className="text-brand-600" /> Audio</span>
+                <span className="inline-flex items-center gap-2"><Laptop size={16} className="text-brand-600" /> Informatique</span>
               </div>
               {shop.address && (
-                <p className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-blue-100/75">
-                  <MapPin size={14} className="shrink-0 text-cyan-300" /> Retrouvez-nous : {shop.address}
+                <p className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-slate-500">
+                  <MapPin size={15} className="shrink-0 text-brand-600" /> Retrouvez-nous : {shop.address}
                 </p>
               )}
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 12 }}
+              initial={{ opacity: 0, scale: 0.97, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.65 }}
-              className="relative mx-auto w-full max-w-[25rem]"
+              transition={{ delay: 0.1, duration: 0.55 }}
+              className="relative mx-auto w-full max-w-[34rem]"
             >
-              <div aria-hidden="true" className="absolute -inset-5 rounded-[3rem] bg-cyan-300/10 blur-2xl" />
-              <div className="hero-showcase relative flex aspect-[1.08/1] items-center justify-center overflow-hidden rounded-[2rem] border border-white/15 shadow-2xl shadow-blue-950/40 sm:aspect-[1.2/1]">
-                <div aria-hidden="true" className="absolute inset-5 rounded-[1.5rem] border border-white/[0.08]" />
-                <div aria-hidden="true" className="hero-ring absolute h-[78%] aspect-square rounded-full border border-cyan-200/15" />
-                <div aria-hidden="true" className="hero-ring hero-ring-inner absolute h-[58%] aspect-square rounded-full border border-white/10" />
-                <div aria-hidden="true" className="absolute h-[48%] aspect-square rounded-full bg-blue-400/20 blur-2xl" />
-                <Logo size={168} className="relative z-10 !h-36 !w-36 shadow-[0_20px_60px_rgba(0,0,0,0.35)] sm:!h-44 sm:!w-44" />
-                <div className="absolute left-4 top-5 flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-950/35 px-3 py-2.5 text-white shadow-xl backdrop-blur-xl sm:left-6 sm:top-7">
-                  <span className="rounded-xl bg-cyan-300/15 p-2 text-cyan-200"><Smartphone size={17} /></span>
-                  <span><span className="block text-[9px] font-semibold uppercase tracking-wider text-blue-100/70">Univers</span><span className="block text-xs font-bold">Mobile & tech</span></span>
+              <div className="hero-showcase relative overflow-hidden rounded-[2rem] p-6 text-white shadow-2xl shadow-slate-900/15 sm:p-8">
+                <div className="relative z-10 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-blue-100">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> L’univers {shop.name}
+                  </span>
+                  <Logo size={42} className="rounded-full bg-white/10 p-1 ring-1 ring-white/15" />
                 </div>
-                <div className="absolute bottom-5 right-4 flex items-center gap-2 rounded-2xl border border-white/15 bg-white/[0.92] px-3 py-2.5 shadow-xl sm:bottom-7 sm:right-6">
-                  <span className="rounded-xl bg-emerald-100 p-2 text-emerald-700"><MessageCircle size={17} /></span>
-                  <span><span className="block text-[9px] font-semibold uppercase tracking-wider text-slate-500">Contact direct</span><span className="block text-xs font-extrabold text-slate-900">WhatsApp</span></span>
+                <h2 className="relative z-10 mt-8 max-w-sm text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">
+                  Tout pour rester connecté.
+                </h2>
+                <p className="relative z-10 mt-2 max-w-sm text-sm leading-relaxed text-blue-100/75">
+                  Téléphones, audio et accessoires pour accompagner votre quotidien.
+                </p>
+
+                <div className="relative mt-8 grid min-h-[14rem] grid-cols-[1fr_0.82fr] gap-3 sm:min-h-[16rem] sm:gap-4">
+                  <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-blue-500/30 to-white/[0.06] p-4 sm:p-5">
+                    <span className="absolute -right-7 -top-8 h-36 w-36 rounded-full border border-white/10" />
+                    <span className="absolute -right-2 -top-3 h-24 w-24 rounded-full border border-white/10" />
+                    <Smartphone size={58} strokeWidth={1.2} className="relative text-cyan-200 sm:h-[4.5rem] sm:w-[4.5rem]" />
+                    <span className="relative">
+                      <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-100/65">Au quotidien</span>
+                      <span className="mt-1 block text-sm font-bold sm:text-base">Téléphones & accessoires</span>
+                    </span>
+                  </div>
+                  <div className="grid grid-rows-2 gap-3 sm:gap-4">
+                    <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-3 sm:p-4">
+                      <span className="rounded-xl bg-cyan-200/10 p-2.5 text-cyan-200"><Headphones size={21} /></span>
+                      <span className="text-sm font-bold">Audio</span>
+                    </div>
+                    <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-3 sm:p-4">
+                      <span className="rounded-xl bg-indigo-200/10 p-2.5 text-indigo-200"><Laptop size={21} /></span>
+                      <span className="text-sm font-bold">Informatique</span>
+                    </div>
+                  </div>
                 </div>
-                <div aria-hidden="true" className="absolute right-[18%] top-[23%] h-2 w-2 rounded-full bg-cyan-200 shadow-[0_0_22px_5px_rgba(103,232,249,0.55)]" />
-                <div aria-hidden="true" className="absolute bottom-[23%] left-[18%] h-1.5 w-1.5 rounded-full bg-blue-200 shadow-[0_0_18px_4px_rgba(147,197,253,0.5)]" />
-              </div>
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-white/15 bg-slate-950/50 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-blue-100/80 shadow-lg backdrop-blur-xl">
-                {shop.name} <span className="mx-1.5 text-cyan-300">·</span> Technologie & accessoires
+                <a href="#produits" className="group relative z-10 mt-5 inline-flex items-center gap-2 text-sm font-bold text-white transition hover:text-cyan-200">
+                  Voir la sélection <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                </a>
               </div>
             </motion.div>
           </div>
-
-          <div className="mt-12 grid gap-3 border-t border-white/10 pt-5 sm:grid-cols-3 sm:gap-5 lg:mt-16">
-            {[
-              { icon: Smartphone, title: `${db.products.length} produit${db.products.length > 1 ? "s" : ""}`, text: "Un catalogue de téléphones et d’accessoires à découvrir." },
-              { icon: Sparkles, title: `${availableProducts} disponible${availableProducts > 1 ? "s" : ""}`, text: "Consultez les disponibilités affichées sur chaque produit." },
-              { icon: MessageCircle, title: "Commande directe", text: "Échangez avec notre équipe sur WhatsApp." },
-            ].map((item, index) => (
-              <div key={index} className="flex items-start gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-3.5 backdrop-blur-sm sm:border-transparent sm:bg-transparent sm:p-2">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cyan-200/10 text-cyan-200 ring-1 ring-cyan-100/10">
-                  <item.icon size={17} />
-                </span>
-                <span>
-                  <span className="block text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-200/80">{item.title}</span>
-                  <span className="mt-1 block text-xs leading-relaxed text-blue-100/70">{item.text}</span>
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
-        <svg aria-hidden="true" className="absolute bottom-0 left-0 w-full text-[#f8fbff]" viewBox="0 0 1440 60" preserveAspectRatio="none" fill="currentColor">
-          <path d="M0,30 C360,70 1080,-10 1440,30 L1440,60 L0,60 Z" />
-        </svg>
+      </section>
+
+      <section aria-label="Les services de la boutique" className="mx-auto grid max-w-6xl gap-3 px-4 pb-10 pt-5 sm:grid-cols-3 sm:gap-4 sm:pb-14">
+        {[
+          { icon: Smartphone, title: `${db.products.length} produit${db.products.length > 1 ? "s" : ""}`, text: "Une sélection à parcourir en boutique." },
+          { icon: Sparkles, title: `${availableProducts} disponible${availableProducts > 1 ? "s" : ""}`, text: "Consultez les stocks affichés sur chaque produit." },
+          { icon: MessageCircle, title: "Commande directe", text: "Échangez avec notre équipe sur WhatsApp." },
+        ].map((item) => (
+          <div key={item.title} className="flex items-start gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-900/[0.02] sm:p-5">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+              <item.icon size={18} />
+            </span>
+            <span>
+              <span className="block text-sm font-bold text-slate-900">{item.title}</span>
+              <span className="mt-1 block text-xs leading-relaxed text-slate-500">{item.text}</span>
+            </span>
+          </div>
+        ))}
       </section>
 
       {/* Catalogue */}

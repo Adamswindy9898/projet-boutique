@@ -1,10 +1,6 @@
-import { shop } from "@/config/shop";
+import { requireSupabase } from "@/lib/supabase";
 
-export const AUTH_KEY = "boutique-auth";
-const USERS_KEY = "ousmatech-users-v1";
-const PASSWORD_ITERATIONS = 120_000;
-
-export type UserRole = "admin" | "user";
+export type UserRole = "admin";
 
 export interface AuthSession {
   id: string;
@@ -13,281 +9,83 @@ export interface AuthSession {
   role: UserRole;
 }
 
-export interface UserAccount extends AuthSession {
-  createdAt: string;
+async function toAdminSession(userId: string, email: string, name?: string): Promise<AuthSession | null> {
+  const client = requireSupabase();
+  const { data: isAdmin, error } = await client.rpc("is_shop_admin");
+  if (error) throw new Error(`Vérification des droits impossible : ${error.message}`);
+  if (!isAdmin) return null;
+  return { id: userId, username: email, name: name || email, role: "admin" };
 }
 
-interface StoredAccount extends UserAccount {
-  salt: string;
-  passwordHash: string;
-}
-
-const bytesToHex = (bytes: Uint8Array) =>
-  Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
-
-function hashesMatch(left: string, right: string) {
-  if (left.length !== right.length) return false;
-  let difference = 0;
-  for (let index = 0; index < left.length; index += 1) {
-    difference |= left.charCodeAt(index) ^ right.charCodeAt(index);
-  }
-  return difference === 0;
-}
-
-async function hashPassword(password: string, salt: string) {
-  if (!globalThis.crypto?.subtle) {
-    throw new Error("Le chiffrement des mots de passe n’est pas disponible sur cette connexion.");
-  }
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", salt: new TextEncoder().encode(salt), iterations: PASSWORD_ITERATIONS, hash: "SHA-256" },
-    key,
-    256
-  );
-  return bytesToHex(new Uint8Array(bits));
-}
-
-function readStoredAccounts(): StoredAccount[] {
-  const raw = localStorage.getItem(USERS_KEY);
-  if (!raw) return [];
-  const parsed: unknown = JSON.parse(raw);
-  if (
-    !Array.isArray(parsed) ||
-    parsed.some(
-      (account) =>
-        !account ||
-        typeof account.id !== "string" ||
-        typeof account.name !== "string" ||
-        typeof account.username !== "string" ||
-        (account.role !== "admin" && account.role !== "user") ||
-        typeof account.salt !== "string" ||
-        typeof account.passwordHash !== "string" ||
-        typeof account.createdAt !== "string"
-    )
-  ) {
-    throw new Error("La liste des utilisateurs est illisible.");
-  }
-  return parsed as StoredAccount[];
-}
-
-function writeStoredAccounts(accounts: StoredAccount[]) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(accounts));
-}
-
-function publicAccount({ salt: _salt, passwordHash: _passwordHash, ...account }: StoredAccount): UserAccount {
-  return account;
-}
-
-function toSession(account: StoredAccount): AuthSession {
-  return { id: account.id, username: account.username, name: account.name, role: account.role };
-}
-
-async function makeAccount(name: string, username: string, password: string, role: UserRole): Promise<StoredAccount> {
-  const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
-  return {
-    id: `${Date.now().toString(36)}-${bytesToHex(crypto.getRandomValues(new Uint8Array(16)))}`,
-    name,
-    username,
-    role,
-    salt,
-    passwordHash: await hashPassword(password, salt),
-    createdAt: new Date().toISOString(),
-  };
-}
-
-async function ensureDefaultAdmin() {
-  const accounts = readStoredAccounts();
-  if (!accounts.length) {
-    const admin = await makeAccount("Administrateur OUSMATECH", shop.initialAdminUsername, shop.initialAdminPassword, "admin");
-    writeStoredAccounts([admin]);
-    return [admin];
-  }
-
-  const legacyAdmin = accounts.find((account) => account.role === "admin" && account.username === shop.legacyAdminUsername);
-  const newUsernameExists = accounts.some((account) => account.username === shop.initialAdminUsername);
-  if (
-    legacyAdmin &&
-    !newUsernameExists &&
-    hashesMatch(await hashPassword(shop.legacyAdminPassword, legacyAdmin.salt), legacyAdmin.passwordHash)
-  ) {
-    const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
-    const migratedAdmin: StoredAccount = {
-      ...legacyAdmin,
-      username: shop.initialAdminUsername,
-      salt,
-      passwordHash: await hashPassword(shop.initialAdminPassword, salt),
-    };
-    const migratedAccounts = accounts.map((account) => (account.id === legacyAdmin.id ? migratedAdmin : account));
-    writeStoredAccounts(migratedAccounts);
-    return migratedAccounts;
-  }
-
-  const bootstrapAdmin = accounts.find(
-    (account) => account.role === "admin" && account.username === shop.initialAdminUsername
-  );
-  if (
-    bootstrapAdmin &&
-    hashesMatch(await hashPassword(shop.previousInitialAdminPassword, bootstrapAdmin.salt), bootstrapAdmin.passwordHash)
-  ) {
-    const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
-    const migratedAdmin: StoredAccount = {
-      ...bootstrapAdmin,
-      salt,
-      passwordHash: await hashPassword(shop.initialAdminPassword, salt),
-    };
-    const migratedAccounts = accounts.map((account) => (account.id === bootstrapAdmin.id ? migratedAdmin : account));
-    writeStoredAccounts(migratedAccounts);
-    return migratedAccounts;
-  }
-
-  return accounts;
-}
-
-export function getAuthSession(): AuthSession | null {
-  const raw = localStorage.getItem(AUTH_KEY);
-  if (!raw || raw === "1") return null;
-  const parsed: unknown = JSON.parse(raw);
-  if (
-    !parsed ||
-    typeof parsed !== "object" ||
-    !("id" in parsed) ||
-    !("username" in parsed) ||
-    !("name" in parsed) ||
-    !("role" in parsed) ||
-    typeof parsed.id !== "string" ||
-    typeof parsed.username !== "string" ||
-    typeof parsed.name !== "string" ||
-    (parsed.role !== "admin" && parsed.role !== "user")
-  ) {
-    return null;
-  }
-  return { id: parsed.id, username: parsed.username, name: parsed.name, role: parsed.role };
+export async function getAuthSession(): Promise<AuthSession | null> {
+  const client = requireSupabase();
+  const { data, error } = await client.auth.getUser();
+  if (error || !data.user?.email) return null;
+  return toAdminSession(data.user.id, data.user.email, data.user.user_metadata.name);
 }
 
 export async function restoreAuthSession(): Promise<AuthSession | null> {
-  if (localStorage.getItem(AUTH_KEY) === "1") {
-    const accounts = await ensureDefaultAdmin();
-    const admin = accounts.find((account) => account.role === "admin");
-    if (!admin) throw new Error("Aucun compte administrateur n’est configuré.");
-    const session = toSession(admin);
-    localStorage.setItem(AUTH_KEY, JSON.stringify(session));
-    return session;
-  }
-  const session = getAuthSession();
-  if (!session) return null;
-  const account = readStoredAccounts().find((entry) => entry.id === session.id);
-  if (!account || account.username !== session.username || account.role !== session.role) {
-    localStorage.removeItem(AUTH_KEY);
+  const client = requireSupabase();
+  const { data, error } = await client.auth.getSession();
+  if (error) throw new Error(`Vérification de la session impossible : ${error.message}`);
+  const user = data.session?.user;
+  if (!user?.email) return null;
+  const session = await toAdminSession(user.id, user.email, user.user_metadata.name);
+  if (!session) {
+    await client.auth.signOut();
     return null;
   }
-  return toSession(account);
-}
-
-export async function loginUser(username: string, password: string): Promise<AuthSession | null> {
-  const accounts = await ensureDefaultAdmin();
-  const normalizedUsername = username.trim().toLowerCase();
-
-  if (
-    normalizedUsername === shop.initialAdminUsername &&
-    [shop.initialAdminPassword, shop.previousInitialAdminPassword].includes(password)
-  ) {
-    const admin = accounts.find((entry) => entry.role === "admin");
-    const freshAccount = await makeAccount(
-      admin?.name ?? "Administrateur OUSMATECH",
-      shop.initialAdminUsername,
-      shop.initialAdminPassword,
-      "admin"
-    );
-    const updatedAccount = admin ? { ...freshAccount, id: admin.id, createdAt: admin.createdAt } : freshAccount;
-    const updatedAccounts = admin
-      ? accounts.map((entry) => (entry.id === admin.id ? updatedAccount : entry))
-      : [...accounts, updatedAccount];
-    writeStoredAccounts(updatedAccounts);
-    const session = toSession(updatedAccount);
-    localStorage.setItem(AUTH_KEY, JSON.stringify(session));
-    return session;
-  }
-
-  const account = accounts.find((entry) => entry.username === normalizedUsername);
-  if (!account || !hashesMatch(await hashPassword(password, account.salt), account.passwordHash)) return null;
-  const session = toSession(account);
-  localStorage.setItem(AUTH_KEY, JSON.stringify(session));
   return session;
 }
 
-export async function resetAdminAccess(): Promise<{ username: string; password: string }> {
-  const accounts = readStoredAccounts();
-  const admin = accounts.find((account) => account.role === "admin");
-  const conflictingAccount = accounts.find(
-    (account) => account.role !== "admin" && account.username === shop.initialAdminUsername
-  );
-  if (conflictingAccount) {
-    throw new Error("Un utilisateur utilise déjà l’identifiant administrateur. Contactez votre administrateur.");
+export async function loginUser(email: string, password: string): Promise<AuthSession | null> {
+  const client = requireSupabase();
+  const { data, error } = await client.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+  if (error) {
+    if (error.message === "Invalid login credentials") return null;
+    throw new Error(`Connexion impossible : ${error.message}`);
   }
-
-  const reset = admin
-    ? await makeAccount(shop.name, shop.initialAdminUsername, shop.initialAdminPassword, "admin").then((fresh) => ({
-        ...fresh,
-        id: admin.id,
-        createdAt: admin.createdAt,
-      }))
-    : await makeAccount(shop.name, shop.initialAdminUsername, shop.initialAdminPassword, "admin");
-  const updatedAccounts = admin
-    ? accounts.map((account) => (account.id === admin.id ? reset : account))
-    : [...accounts, reset];
-  writeStoredAccounts(updatedAccounts);
-  localStorage.removeItem(AUTH_KEY);
-  return { username: shop.initialAdminUsername, password: shop.initialAdminPassword };
+  if (!data.user.email) {
+    await client.auth.signOut();
+    return null;
+  }
+  const session = await toAdminSession(data.user.id, data.user.email, data.user.user_metadata.name);
+  if (!session) {
+    await client.auth.signOut();
+    throw new Error("Ce compte n’est pas autorisé à gérer cette boutique.");
+  }
+  return session;
 }
 
-export function listUserAccounts(): UserAccount[] {
-  return readStoredAccounts().map(publicAccount);
+export async function resetAdminAccess(email: string): Promise<void> {
+  const client = requireSupabase();
+  const { error } = await client.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+    redirectTo: `${window.location.origin}/connexion?recovery=1`,
+  });
+  if (error) throw new Error(`Envoi du lien de réinitialisation impossible : ${error.message}`);
+}
+
+export async function finishPasswordRecovery(password: string): Promise<void> {
+  if (password.length < 8) throw new Error("Le mot de passe doit contenir au moins 8 caractères.");
+  const client = requireSupabase();
+  const { error } = await client.auth.updateUser({ password });
+  if (error) throw new Error(`Modification du mot de passe impossible : ${error.message}`);
 }
 
 export async function changeOwnPassword(session: AuthSession, currentPassword: string, newPassword: string) {
-  const accounts = readStoredAccounts();
-  const account = accounts.find((entry) => entry.id === session.id);
-  if (!account || !hashesMatch(await hashPassword(currentPassword, account.salt), account.passwordHash)) {
-    throw new Error("Le mot de passe actuel est incorrect.");
-  }
   if (newPassword.length < 8) throw new Error("Le nouveau mot de passe doit contenir au moins 8 caractères.");
-  const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
-  const updated = { ...account, salt, passwordHash: await hashPassword(newPassword, salt) };
-  writeStoredAccounts(accounts.map((entry) => (entry.id === account.id ? updated : entry)));
+  const client = requireSupabase();
+  const { error: signInError } = await client.auth.signInWithPassword({
+    email: session.username,
+    password: currentPassword,
+  });
+  if (signInError) throw new Error("Le mot de passe actuel est incorrect.");
+  const { error } = await client.auth.updateUser({ password: newPassword });
+  if (error) throw new Error(`Modification du mot de passe impossible : ${error.message}`);
 }
 
-export async function createUserAccount(
-  actor: AuthSession,
-  name: string,
-  username: string,
-  password: string
-): Promise<UserAccount[]> {
-  const accounts = readStoredAccounts();
-  if (actor.role !== "admin" || !accounts.some((entry) => entry.id === actor.id && entry.role === "admin")) {
-    throw new Error("Seul l’administrateur peut ajouter des utilisateurs.");
-  }
-  const cleanName = name.trim();
-  const cleanUsername = username.trim().toLowerCase();
-  if (cleanName.length < 2) throw new Error("Saisissez un nom d’au moins 2 caractères.");
-  if (!/^[a-z0-9._-]{3,30}$/.test(cleanUsername)) {
-    throw new Error("L’identifiant doit contenir 3 à 30 caractères : lettres, chiffres, point, tiret ou souligné.");
-  }
-  if (accounts.some((entry) => entry.username === cleanUsername)) throw new Error("Cet identifiant existe déjà.");
-  if (password.length < 8) throw new Error("Le mot de passe doit contenir au moins 8 caractères.");
-  const account = await makeAccount(cleanName, cleanUsername, password, "user");
-  const updated = [...accounts, account];
-  writeStoredAccounts(updated);
-  return updated.map(publicAccount);
-}
-
-export function deleteUserAccount(actor: AuthSession, userId: string): UserAccount[] {
-  const accounts = readStoredAccounts();
-  if (actor.role !== "admin" || !accounts.some((entry) => entry.id === actor.id && entry.role === "admin")) {
-    throw new Error("Seul l’administrateur peut supprimer un utilisateur.");
-  }
-  const target = accounts.find((entry) => entry.id === userId);
-  if (!target || target.role === "admin") throw new Error("Ce compte ne peut pas être supprimé.");
-  const updated = accounts.filter((entry) => entry.id !== userId);
-  writeStoredAccounts(updated);
-  return updated.map(publicAccount);
+export async function signOut() {
+  const client = requireSupabase();
+  const { error } = await client.auth.signOut();
+  if (error) throw new Error(`Déconnexion impossible : ${error.message}`);
 }

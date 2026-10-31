@@ -28,10 +28,4 @@ export const shop = {
   // Facturation
   currency: "FCFA",
 
-  // Identifiants initiaux du compte administrateur (à changer dans Paramètres).
-  initialAdminUsername: "admin@gestcom.local",
-  initialAdminPassword: "Ousma2026!",
-  previousInitialAdminPassword: "OusmaTech@2026#Admin",
-  legacyAdminUsername: "admin",
-  legacyAdminPassword: "1234",
 };
