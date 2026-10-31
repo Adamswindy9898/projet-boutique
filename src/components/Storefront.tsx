@@ -135,8 +135,8 @@ export function Storefront() {
   return (
     <div className="storefront-shell min-h-screen">
       {/* Barre de navigation */}
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 shadow-[0_4px_24px_rgba(15,23,42,0.04)] backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5 sm:py-3">
+      <header className="sticky top-0 z-40 border-b border-white/70 bg-white/90 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between px-4 py-2 sm:py-3">
           <a href="#top" className="flex items-center gap-2.5">
             <Logo size={42} />
             <span>
@@ -144,12 +144,12 @@ export function Storefront() {
               <span className="hidden text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 sm:block">Technologie & accessoires</span>
             </span>
           </a>
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-600 md:flex">
-            <a href="#produits" className="hover:text-brand-700">Produits</a>
-            <a href="#contact" className="hover:text-brand-700">Contact</a>
+          <nav aria-label="Navigation principale" className="order-3 flex w-full items-center justify-center gap-2 border-t border-slate-100 pt-2 text-xs font-semibold text-slate-600 md:order-none md:w-auto md:gap-3 md:border-0 md:pt-0 md:text-sm">
+            <a href="#produits" className="rounded-full px-4 py-2 transition hover:bg-brand-50 hover:text-brand-700">Produits</a>
+            <a href="#contact" className="rounded-full px-4 py-2 transition hover:bg-brand-50 hover:text-brand-700">Contact</a>
           </nav>
           <div className="flex items-center gap-2">
-            <a href={telLink} className="btn-soft !px-3 !py-2 sm:!px-4">
+            <a href={telLink} className="btn-soft !rounded-full !px-3 !py-2 sm:!px-4">
               <Phone size={16} /> <span className="hidden sm:inline">Appeler</span>
             </a>
           </div>
@@ -161,15 +161,15 @@ export function Storefront() {
         <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-12 sm:pb-16 sm:pt-16 lg:pb-20 lg:pt-20">
           <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
-              <span className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-brand-700 shadow-sm">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-100 shadow-sm backdrop-blur">
                 <Sparkles size={14} /> Bienvenue chez {shop.name}
               </span>
-              <h1 className="mt-6 max-w-xl text-[2.75rem] font-black leading-[1.06] tracking-[-0.045em] text-slate-950 sm:text-6xl">
+              <h1 className="mt-6 max-w-xl text-[2.75rem] font-black leading-[1.06] tracking-[-0.045em] text-white sm:text-6xl">
                 La technologie,
-                <span className="mt-1 block text-brand-600">en toute simplicité.</span>
+                <span className="mt-1 block text-cyan-300">en toute simplicité.</span>
               </h1>
-              <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-600 sm:text-lg">{shop.tagline}</p>
-              <p className="mt-2 max-w-lg text-sm leading-relaxed text-slate-500">
+              <p className="mt-5 max-w-lg text-base leading-relaxed text-blue-100 sm:text-lg">{shop.tagline}</p>
+              <p className="mt-2 max-w-lg text-sm leading-relaxed text-slate-300">
                 Parcourez notre sélection et contactez-nous pour trouver l’équipement qui vous convient.
               </p>
               <div className="mt-8 flex flex-col gap-3 min-[420px]:flex-row">
@@ -185,14 +185,14 @@ export function Storefront() {
                   <MessageCircle size={18} /> Nous écrire sur WhatsApp
                 </a>
               </div>
-              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm font-medium text-slate-600">
-                <span className="inline-flex items-center gap-2"><Smartphone size={16} className="text-brand-600" /> Téléphones</span>
-                <span className="inline-flex items-center gap-2"><Headphones size={16} className="text-brand-600" /> Audio</span>
-                <span className="inline-flex items-center gap-2"><Laptop size={16} className="text-brand-600" /> Informatique</span>
+              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm font-medium text-blue-100">
+                <span className="inline-flex items-center gap-2"><Smartphone size={16} className="text-cyan-300" /> Téléphones</span>
+                <span className="inline-flex items-center gap-2"><Headphones size={16} className="text-cyan-300" /> Audio</span>
+                <span className="inline-flex items-center gap-2"><Laptop size={16} className="text-cyan-300" /> Informatique</span>
               </div>
               {shop.address && (
-                <p className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-slate-500">
-                  <MapPin size={15} className="shrink-0 text-brand-600" /> Retrouvez-nous : {shop.address}
+                <p className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-slate-300">
+                  <MapPin size={15} className="shrink-0 text-cyan-300" /> Retrouvez-nous : {shop.address}
                 </p>
               )}
             </motion.div>
@@ -359,7 +359,7 @@ export function Storefront() {
               })}
             </div>
           </div>
-          <div className="rounded-3xl bg-gradient-to-br from-brand-50 to-white p-6 ring-1 ring-brand-100">
+          <div className="min-w-0 rounded-3xl bg-gradient-to-br from-brand-50 to-white p-4 ring-1 ring-brand-100 sm:p-6">
             <QrCard />
           </div>
         </div>

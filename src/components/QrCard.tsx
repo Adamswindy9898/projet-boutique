@@ -42,7 +42,7 @@ export function QrCard() {
         {url ? <QRCodeSVG value={url} size={168} level="M" /> : <div className="h-[168px] w-[168px] animate-pulse rounded-xl bg-slate-100" />}
       </div>
       <p className="text-sm font-semibold text-slate-700">Scannez pour ouvrir la boutique {shop.name}</p>
-      <div className="no-print flex gap-2">
+      <div className="no-print flex flex-wrap justify-center gap-2">
         <button onClick={download} className="btn bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">
           <Download size={15} /> Télécharger
         </button>

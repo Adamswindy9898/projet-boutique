@@ -109,17 +109,18 @@ export const useToast = () => useContext(ToastCtx);
 /* ---------- Petits blocs ---------- */
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
   return (
-    <div className="relative mb-7 overflow-hidden rounded-[1.75rem] border border-blue-100/80 bg-gradient-to-br from-white via-blue-50/90 to-indigo-100/60 p-5 shadow-[0_14px_38px_rgba(37,99,235,0.07)] sm:p-7">
-      <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-20 h-56 w-56 rounded-full bg-blue-200/30 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute bottom-0 right-1/3 h-24 w-24 rounded-full bg-cyan-200/20 blur-2xl" />
+    <div className="admin-page-header relative mb-7 overflow-hidden rounded-[1.75rem] border border-blue-200/15 p-5 shadow-[0_18px_48px_rgba(7,21,45,0.16)] sm:p-7">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(191,219,254,0.25)_0.7px,transparent_0.7px)] bg-[size:28px_28px] opacity-20" />
+      <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-20 h-56 w-56 rounded-full bg-blue-400/20 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute bottom-0 right-1/3 h-24 w-24 rounded-full bg-cyan-300/15 blur-2xl" />
       <div className="relative flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <span className="mb-2 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-brand-700 shadow-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-500" />
+          <span className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-100 shadow-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-300" />
             Espace de gestion
           </span>
-          <h1 className="text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">{title}</h1>
-          {subtitle && <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">{subtitle}</p>}
+          <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">{title}</h1>
+          {subtitle && <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-blue-100/75 sm:text-base">{subtitle}</p>}
         </div>
         {actions && <div className="no-print flex w-full flex-wrap items-center gap-2 sm:w-auto">{actions}</div>}
       </div>

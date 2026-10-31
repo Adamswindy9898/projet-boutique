@@ -70,12 +70,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="admin-shell lg:pl-64">
-      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-blue-100/80 bg-white/90 p-4 shadow-[8px_0_32px_rgba(15,23,42,0.03)] backdrop-blur-xl lg:flex">
-        <div className="flex items-center gap-3 rounded-2xl border border-blue-100/70 bg-gradient-to-r from-white to-blue-50/80 px-2.5 py-3 shadow-sm">
+      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-white/10 bg-gradient-to-b from-[#07152d] via-[#0b1c3c] to-[#102b53] p-4 shadow-[8px_0_32px_rgba(15,23,42,0.12)] lg:flex">
+        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] px-2.5 py-3 shadow-sm">
           <Logo size={42} />
           <div className="min-w-0">
-            <p className="truncate font-extrabold text-slate-900">{shop.name}</p>
-            <p className="truncate text-xs text-slate-400">{session?.name}</p>
+            <p className="truncate font-extrabold text-white">{shop.name}</p>
+            <p className="truncate text-xs text-blue-200/70">{session?.name}</p>
           </div>
         </div>
         <nav className="mt-7 flex flex-1 flex-col gap-1.5">
@@ -85,7 +85,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               href={n.href}
               className={cn(
                 "flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-semibold transition duration-200",
-                active(n.href) ? "bg-gradient-to-r from-brand-700 to-brand-500 text-white shadow-lg shadow-brand-600/20" : "text-slate-600 hover:translate-x-0.5 hover:bg-blue-50/80 hover:text-brand-800"
+                active(n.href) ? "bg-cyan-300 text-slate-950 shadow-lg shadow-cyan-950/20" : "text-blue-100/75 hover:translate-x-0.5 hover:bg-white/10 hover:text-white"
               )}
             >
               <n.icon size={18} /> {n.label}
@@ -93,16 +93,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <div className="space-y-1">
-          <Link href="/" target="_blank" className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+          <Link href="/" target="_blank" className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-blue-100/75 transition hover:bg-white/10 hover:text-white">
             <ExternalLink size={18} /> Voir la vitrine
           </Link>
-          <button onClick={logout} className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50">
+          <button onClick={logout} className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-rose-200 transition hover:bg-rose-400/10 hover:text-rose-100">
             <LogOut size={18} /> Déconnexion
           </button>
         </div>
       </aside>
 
-      <header className="no-print sticky top-0 z-30 flex items-center justify-between border-b border-blue-100/80 bg-white/90 px-4 py-3 shadow-sm backdrop-blur lg:hidden">
+      <header className="no-print sticky top-0 z-30 flex items-center justify-between border-b border-white/70 bg-white/90 px-4 py-3 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl lg:hidden">
         <div className="flex items-center gap-2.5">
           <Logo size={34} />
           <span>
@@ -122,10 +122,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
       <main className="mx-auto max-w-6xl p-4 pb-28 sm:p-6 lg:pb-10">{children}</main>
 
-      <nav className="no-print fixed inset-x-0 bottom-0 z-30 grid grid-cols-8 border-t border-blue-100/80 bg-white/95 px-0.5 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur lg:hidden">
+      <nav aria-label="Navigation de gestion" className="no-print fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 grid-rows-2 border-t border-white/10 bg-[#07152d]/95 px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(7,21,45,0.2)] backdrop-blur-xl lg:hidden">
         {nav.map((n) => (
-          <Link key={n.href} href={n.href} className={cn("flex flex-col items-center gap-1 rounded-xl py-2 text-[9px] font-semibold transition sm:text-[11px]", active(n.href) ? "bg-brand-50 text-brand-700" : "text-slate-400 hover:bg-slate-50")}>
-            <n.icon size={20} />
+          <Link key={n.href} href={n.href} className={cn("flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-[10px] font-semibold transition sm:text-[11px]", active(n.href) ? "bg-cyan-300 text-slate-950" : "text-blue-100/65 hover:bg-white/10 hover:text-white")}>
+            <n.icon size={18} />
             {n.short}
           </Link>
         ))}
