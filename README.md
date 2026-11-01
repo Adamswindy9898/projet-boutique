@@ -37,8 +37,13 @@ L'authentification et les données de la boutique sont stockées dans Supabase. 
 1. Importez `ThiernoAmadouBa/project_boutique` dans Vercel et nommez le projet `ousmanetech`.
 2. Dans **Settings → Environment Variables**, configurez `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` avec les mêmes valeurs que `.env.local`.
 3. Déployez la branche `main`, puis ajoutez l'URL de production Vercel aux URL de redirection Supabase avant d'utiliser la récupération de mot de passe.
+4. Pour utiliser `www.ousmatech.com`, ajoutez ce domaine dans **Vercel → Settings → Domains**, puis configurez les enregistrements DNS indiqués par Vercel chez votre fournisseur de domaine. Ajoutez ensuite `https://www.ousmatech.com/connexion?recovery=1` aux URL de redirection Supabase.
 
 Les données sont partagées entre les navigateurs via Supabase. Les produits publics sont servis séparément des données réservées au compte gérant.
+
+## Installer l'application
+
+Sur un navigateur compatible, utilisez l'invite **Installer l'application** pour l'ajouter à l'écran d'accueil ou au bureau. Sur iPhone/iPad, ouvrez le site dans Safari, touchez **Partager**, puis **Sur l'écran d'accueil**. L'installation nécessite le site en HTTPS.
 
 ## Personnaliser (`src/config/shop.ts`)
 - Nom, slogan, contacts du gérant, adresse, NINEA et RCCM
