@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, MessageCircle, Pencil, Phone, Plus, Search, UserPlus, Users } from "lucide-react";
+import { MapPin, MessageCircle, Pencil, Phone, Plus, Search, Trash2, UserPlus, Users } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Customer } from "@/lib/types";
 import { cn, digits, fmtDate, invoiceTotals, money, statusMeta, waLink } from "@/lib/utils";
@@ -50,7 +50,7 @@ function CustomerForm({ initial, onSubmit, onCancel }: { initial?: Customer; onS
 }
 
 export default function ClientsPage() {
-  const { db, ready, saveCustomer } = useStore();
+  const { db, ready, saveCustomer, deleteCustomer } = useStore();
   const toast = useToast();
   const [q, setQ] = useState("");
   const [creating, setCreating] = useState(false);
@@ -70,6 +70,13 @@ export default function ClientsPage() {
   }, [db.customers, db.invoices, q]);
 
   const view = rows.find((r) => r.c.id === viewId);
+
+  const removeCustomer = (customer: Customer) => {
+    if (!confirm(`Supprimer le client « ${customer.name} » ? Ses factures existantes seront conservées.`)) return;
+    deleteCustomer(customer.id);
+    if (viewId === customer.id) setViewId(null);
+    toast("Client supprimé", "info");
+  };
 
   if (!ready) return <Loading />;
 
@@ -104,16 +111,27 @@ export default function ClientsPage() {
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {rows.map(({ c, invs, spent }) => (
-            <motion.button key={c.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} whileHover={{ y: -2 }} onClick={() => setViewId(c.id)} className="card flex items-center gap-3 p-4 text-left transition-shadow hover:shadow-md">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-400 to-brand-700 text-lg font-extrabold text-white">{c.name.charAt(0).toUpperCase()}</span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-bold text-slate-900">{c.name}</p>
-                <p className="truncate text-xs text-slate-500">{c.phone || "Pas de téléphone"}</p>
-                <p className="mt-1 text-xs text-slate-400">
-                  {invs.length} document(s) · dépensé {money(spent)}
-                </p>
-              </div>
-            </motion.button>
+            <motion.div key={c.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} whileHover={{ y: -2 }} className="card flex items-center gap-3 p-4 transition-shadow hover:shadow-md">
+              <button type="button" onClick={() => setViewId(c.id)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-400 to-brand-700 text-lg font-extrabold text-white">{c.name.charAt(0).toUpperCase()}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-bold text-slate-900">{c.name}</span>
+                  <span className="block truncate text-xs text-slate-500">{c.phone || "Pas de téléphone"}</span>
+                  <span className="mt-1 block text-xs text-slate-400">
+                    {invs.length} document(s) · dépensé {money(spent)}
+                  </span>
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => removeCustomer(c)}
+                className="btn-ghost !px-3 text-rose-600 hover:bg-rose-50"
+                aria-label={`Supprimer le client ${c.name}`}
+                title="Supprimer le client"
+              >
+                <Trash2 size={16} />
+              </button>
+            </motion.div>
           ))}
         </div>
       )}

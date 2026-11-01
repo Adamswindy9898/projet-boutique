@@ -29,6 +29,7 @@ interface Ctx {
   moveStock: (productId: string, type: MovementType, delta: number, note: string) => void;
   applyInventory: (counts: Record<string, number>) => void;
   saveCustomer: (d: CustomerInput, id?: string) => string;
+  deleteCustomer: (id: string) => void;
   createInvoice: (i: InvoiceInput) => string;
   convertQuote: (id: string) => void;
   deleteInvoice: (id: string) => void;
@@ -280,6 +281,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return cid;
   }, []);
 
+  const deleteCustomer = useCallback((id: string) => {
+    setDb((prev) => ({
+      ...prev,
+      customers: prev.customers.filter((customer) => customer.id !== id),
+      invoices: prev.invoices.map((invoice) =>
+        invoice.customerId === id ? { ...invoice, customerId: undefined } : invoice
+      ),
+    }));
+  }, []);
+
   const createInvoice = useCallback((input: InvoiceInput) => {
     const id = uid();
     setDb((prev) => {
@@ -349,6 +360,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       moveStock,
       applyInventory,
       saveCustomer,
+      deleteCustomer,
       createInvoice,
       convertQuote,
       deleteInvoice,
@@ -356,7 +368,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       resetDemo,
       clearAll,
     }),
-    [db, ready, loadError, saveProduct, deleteProduct, moveStock, applyInventory, saveCustomer, createInvoice, convertQuote, deleteInvoice, clearAllHistory, resetDemo, clearAll]
+    [db, ready, loadError, saveProduct, deleteProduct, moveStock, applyInventory, saveCustomer, deleteCustomer, createInvoice, convertQuote, deleteInvoice, clearAllHistory, resetDemo, clearAll]
   );
 
   return (
